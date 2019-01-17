@@ -17,6 +17,15 @@ go run qrss.go --mode=df --step=10 --dit=0.3s --ramp=0.05   vvv de w6rek/b | \
   time paplay --rate=44100 --channels=1 --format=s16le --raw /dev/stdin
 ```
 
+### Debug Info
+
+Add --x to dump debug info and exit:
+
+```
+$ go run qrss.go --mode=df --step=10 --dit=0.3s --ramp=0.05 --x  vvv de w6rek/b
+2019/01/17 01:40:06 DFEmitter{text="vvv de w6rek/b ",morse="...- ...- ...-   -.. .   .-- -.... .-. . -.- -..-. -...   ",freq=0.0,deltaFreq=10.0,dit=300ms,total=17.4s}
+```
+
 ### BUGS
 
 *   Inconsistency where --dit is Duration but --ramp is float (seconds).
