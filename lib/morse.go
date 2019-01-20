@@ -67,7 +67,7 @@ var MorseCodeMap = map[rune][]DiDah{
 // Morse converts a string into morse code
 // using '.' (1 dit time), '-' (3 dit times), and ' ' (1 dit time).
 // It's fatal if we don't know one of the symbols.
-func Morse(s string, tail bool) []DiDah {
+func Morse(s string, tail bool) DiDahSlice {
 	var z []DiDah
 	n := len(s)
 	for i, r := range strings.ToLower(s) {

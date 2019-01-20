@@ -2,8 +2,12 @@ package lib
 
 import (
 	"bufio"
+	"flag"
 	"log"
+	"os"
 )
+
+var X = flag.Bool("x", false, "Just print")
 
 const MaxShort = 0x7FFF
 
@@ -37,4 +41,19 @@ func Output(volts chan Volt, w *bufio.Writer, done chan bool) {
 		w.WriteByte(byte(yShort >> 8))
 	}
 	done <- true
+}
+
+func Play(em Emitter, w *bufio.Writer) {
+	if *X {
+		log.Printf("%v", em)
+		os.Exit(0)
+	}
+
+	volts := make(chan Volt, int(*RATE)) // for 1.0s
+	done := make(chan bool)
+
+	go Output(volts, w, done)
+	em.Emit(volts)
+	close(volts)
+	<-done
 }

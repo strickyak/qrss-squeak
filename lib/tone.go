@@ -13,7 +13,7 @@ func PlayGap(duration time.Duration, volts chan Volt) {
 }
 
 // Boop writes voltages in range [-1.0, +1.0] to the channel volts.
-// 
+//
 func PlayTone(toneBegin, toneEnd float64, ramp RampType, duration time.Duration, volts chan Volt) {
 	// Add global frequency base to tones to get absolute Hz.
 	hz1 := *FREQ + toneBegin
@@ -22,7 +22,7 @@ func PlayTone(toneBegin, toneEnd float64, ramp RampType, duration time.Duration,
 	// Determine number of ticks and lenghts of ramps up & down.
 	numTicks := *RATE * duration.Seconds()
 	rampTicks := *RATE * *RAMP
-	if rampTicks * 2 > numTicks {
+	if rampTicks*2 > numTicks {
 		// Ramp faster when tone is too short for usual ramp.
 		rampTicks = numTicks / 2
 	}
@@ -42,14 +42,14 @@ func PlayTone(toneBegin, toneEnd float64, ramp RampType, duration time.Duration,
 			// First RampTicks, gain goes from 0.0 to 1.0
 			{
 				x := (float64(t) / rampTicks) * math.Pi
-				y := math.Cos(x)  // Cosine to shape envelope.
+				y := math.Cos(x) // Cosine to shape envelope.
 				envelopeGain = 0.5 - y/2.0
 			}
 		case (ramp == END || ramp == BOTH) && int(numTicks)-t < int(rampTicks):
 			// Last RampTicks, gain goes from 1.0 to 0.0.
 			{
 				x := ((numTicks - float64(t)) / rampTicks) * math.Pi
-				y := math.Cos(x)  // Cosine to shape envelope.
+				y := math.Cos(x) // Cosine to shape envelope.
 				envelopeGain = 0.5 - y/2.0
 			}
 		default:

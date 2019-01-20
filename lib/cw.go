@@ -2,24 +2,31 @@ package lib
 
 import (
 	"fmt"
-	"time"
 	"log"
+	"time"
 )
 
+type CWConf struct {
+	ToneWhenOff bool
+	Dit         time.Duration
+	Freq        float64
+	Width       float64
+	Morse       []DiDah
+	Text        string
+	Tail        bool
+}
 type CWEmitter struct {
-	Dit	time.Duration
-	Freq	float64
-	Morse	[]DiDah
-	Text	string
+	CWConf
 	Total time.Duration
 }
 
-func NewCWEmitter(text string, freq float64, tail bool) *CWEmitter {
+func NewCWEmitter(conf *CWConf) *CWEmitter {
 	o := &CWEmitter{
-		Dit: *DIT,
-		Freq: freq,
-		Morse: Morse(text, tail),
-		Text: text,
+		CWConf: *conf,
+	}
+	// If Text is provided but not Morse, convert Text & Tail to Morse.
+	if len(o.Morse) == 0 {
+		o.Morse = Morse(o.Text, o.Tail)
 	}
 	o.Total = time.Duration(o.DurationInDits()) * o.Dit
 	return o
@@ -29,11 +36,16 @@ func (o *CWEmitter) DurationInDits() float64 {
 	var n float64
 	for _, didah := range o.Morse {
 		switch didah {
-		case '.', ' ': n += 1
-		case '-': n += 3
+		case '.', ' ':
+			n += 2 // 1 for ON, 1 for OFF.
+		case '-':
+			n += 4 // 3 for ON, 1 for OFF.
 		default:
 			log.Fatalf("bad didah: %d in %q", didah, o.Text)
 		}
+	}
+	if !o.Tail {
+		n-- // Delete final OFF.
 	}
 	return n
 }
@@ -43,24 +55,43 @@ func (o *CWEmitter) Duration() time.Duration {
 }
 
 func (o *CWEmitter) String() string {
-	return fmt.Sprintf("CWEmitter{text=%q,morse=%q,freq=%.1f,dit=%v,total=%v}", o.Text, o.Morse, o.Freq, o.Dit, o.Total)
+	if o.ToneWhenOff {
+		return fmt.Sprintf("CWEmitter{ToneWhenOff,text=%q,morse=%q,freq=%.1f,width=%.1f,dit=%v,total=%v}", o.Text, o.Morse, o.Freq, o.Width, o.Dit, o.Total)
+	} else {
+		return fmt.Sprintf("CWEmitter{text=%q,morse=%q,freq=%.1f,dit=%v,total=%v}", o.Text, o.Morse, o.Freq, o.Dit, o.Total)
+	}
 }
 
 func (o *CWEmitter) Emit(out chan Volt) {
-	for _, didah := range o.Morse {
-		switch didah {
-		case '.': {
-			PlayTone(o.Freq, o.Freq, BOTH, o.Dit, out)
-		}
-		case '-': {
-			PlayTone(o.Freq, o.Freq, BOTH, 3 * o.Dit, out)
-		}
-		case ' ': {
+	f0, f1 := o.Freq, o.Freq // OFF, ON frequencies.
+	if o.ToneWhenOff {
+		f1 += o.Width
+	}
+	log.Printf("CW EMIT: %v", o)
+	gap := func() {
+		if o.ToneWhenOff {
+			PlayTone(f0, f0, BOTH, o.Dit, out)
+		} else {
 			PlayGap(o.Dit, out)
 		}
+	}
+
+	lenMorse, i := len(o.Morse), 0
+	for _, didah := range o.Morse {
+		i++
+		switch didah {
+		case '.':
+			PlayTone(f1, f1, BOTH, o.Dit, out)
+		case '-':
+			PlayTone(f1, f1, BOTH, 3*o.Dit, out)
+		case ' ':
+			gap()
 		default:
 			log.Fatalf("bad didah: %d in %q", didah, o.Text)
 		}
-		PlayGap(o.Dit, out)
+
+		if o.Tail || i < lenMorse {
+			gap()
+		}
 	}
 }
