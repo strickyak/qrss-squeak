@@ -80,7 +80,7 @@ func mainParallelCW(text string, flusher func()) Emitter {
 	text = strings.TrimSpace(text)
 	var inputs []Emitter
 	n := 0
-	for i, r := range text {
+	for _, _ = range text {
 		n++
 	}
 	band := *WIDTH / float64(n)
