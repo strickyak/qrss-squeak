@@ -77,12 +77,18 @@ func mainTFCW(text string, flusher func()) Emitter {
 }
 
 func mainParallelCW(text string, flusher func()) Emitter {
+	text = strings.TrimSpace(text)
 	var inputs []Emitter
+	n := 0
+	for i, r := range text {
+		n++
+	}
+	band := *WIDTH / float64(n)
 	for i, r := range text {
 		inputs = append(inputs, NewCWEmitter(&CWConf{
 			ToneWhenOff: false,
-			Dit:         time.Second,
-			Freq:        -100 * float64(i),
+			Dit:         *DIT,
+			Freq:        *WIDTH - ((float64(i) + 0.5) * band),
 			Width:       0,
 			Text:        string(r),
 			Tail:        false,
