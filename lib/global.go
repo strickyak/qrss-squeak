@@ -2,6 +2,7 @@ package lib
 
 import (
 	"flag"
+	"log"
 	"time"
 )
 
@@ -40,3 +41,9 @@ const (
 	END
 	BOTH
 )
+
+func Must(pred bool) {
+	if !pred {
+		log.Fatal("Must FAILED")
+	}
+}

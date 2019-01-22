@@ -2,6 +2,7 @@ package lib
 
 import (
 	"fmt"
+	"log"
 	"time"
 )
 
@@ -21,8 +22,12 @@ func (o *Gain) String() string {
 }
 
 func (o *Gain) Emit(out chan Volt) {
+	log.Printf("Gain Start: %v", o)
 	in := make(chan Volt, small)
-	go o.Input.Emit(in)
+	go func() {
+		o.Input.Emit(in)
+		close(in)
+	}()
 	for {
 		x, ok := <-in
 		if !ok {
@@ -30,5 +35,5 @@ func (o *Gain) Emit(out chan Volt) {
 		}
 		out <- Volt(o.Gain) * x
 	}
-	close(out)
+	log.Printf("Gain Finish: %v", o)
 }

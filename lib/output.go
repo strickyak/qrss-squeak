@@ -44,8 +44,8 @@ func Output(volts chan Volt, w *bufio.Writer, done chan bool) {
 }
 
 func Play(em Emitter, w *bufio.Writer) {
+	log.Printf("Play: %v", em)
 	if *X {
-		log.Printf("%v", em)
 		os.Exit(0)
 	}
 

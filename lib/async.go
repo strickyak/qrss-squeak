@@ -33,7 +33,10 @@ func NewAsyncSum(flusher func()) *AsyncSum {
 
 func (o *AsyncSum) Add(e Emitter) {
 	ch := make(chan Volt)
-	go e.Emit(ch)
+	go func() {
+		e.Emit(ch)
+		close(ch)
+	}()
 	o.adding <- ch
 }
 
@@ -67,7 +70,8 @@ func (o *AsyncSum) Emit(out chan Volt) {
 				// Don't block.
 			}
 		} else {
-			o.flusher()         // Flush before blocking!
+			o.flusher() // Flush before blocking!
+			log.Printf("AsyncSum blocking.")
 			e, ok := <-o.adding // Block.
 			if !ok {
 				log.Fatalf("Not expecting `adding` to close.")

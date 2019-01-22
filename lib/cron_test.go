@@ -2,10 +2,11 @@ package lib
 
 import (
 	"testing"
-	"time"
+	. "time"
 )
 
 func Test3Seconds(t *testing.T) {
+	TEST_Scaling = 5 // Speed up the test 5x.
 	i := 0
 	p := &Cron{
 		ModuloSeconds:    2,
@@ -15,9 +16,10 @@ func Test3Seconds(t *testing.T) {
 			t.Log("running")
 		}}
 	p.Start()
-	time.Sleep(3 * time.Second)
+	Sleep(3 * Second / Duration(TEST_Scaling))
 	if i < 1 || i > 2 {
 		t.Errorf("got i = %d", i)
+	} else {
+		t.Log("okay: i =", i)
 	}
-	t.Log("okay: i =", i)
 }

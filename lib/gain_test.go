@@ -10,7 +10,10 @@ func TestGain(t *testing.T) {
 		},
 	}
 	ch := make(chan Volt, 0)
-	go o.Emit(ch)
+	go func() {
+		o.Emit(ch)
+		close(ch)
+	}()
 	for i := 1; i <= 3; i++ {
 		x, ok := <-ch
 		if !ok || x != 3.14*Volt(i*i) {

@@ -49,11 +49,11 @@ func (o *DFEmitter) String() string {
 }
 
 func (o *DFEmitter) Emit(out chan Volt) {
+	log.Printf("DFEmitter Start: %v", o)
 	f0, f1, f2 := o.Freq, o.Freq, o.Freq+o.Width // OFF, Dit, Dah frequencies.
 	if o.ToneWhenOff {
 		f0 = (f1 + f2) / 2
 	}
-	log.Printf("DF EMIT: %v", o)
 	gap := func() {
 		if o.ToneWhenOff {
 			PlayTone(f0, f0, BOTH, o.Dit, out)
@@ -80,4 +80,5 @@ func (o *DFEmitter) Emit(out chan Volt) {
 			gap()
 		}
 	}
+	log.Printf("DFEmitter Finish: %v", o)
 }

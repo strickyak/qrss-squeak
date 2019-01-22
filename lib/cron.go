@@ -2,23 +2,25 @@ package lib
 
 import (
 	"log"
-	"time"
+	. "time"
 )
 
 const pollsPerSecond = 10
 
+var TEST_Scaling int64 = 1 // Always 1 except in speeded-up test.
+
 type Cron struct {
-	ModuloSeconds    uint64
-	RemainderSeconds uint64
+	ModuloSeconds    int64
+	RemainderSeconds int64
 	Run              func()
 
-	embargo uint64
+	embargo int64
 }
 
 func (o *Cron) Start() {
-	now := uint64(time.Now().Unix())
+	now := Now().UnixNano() * TEST_Scaling / 1000000000
 	o.embargo = now + 1 // Don't trigger mid-second.
-	tick := time.Second / pollsPerSecond
+	pollTime := Second / Duration(TEST_Scaling) / pollsPerSecond
 	go func() {
 		defer func() {
 			e := recover()
@@ -28,13 +30,13 @@ func (o *Cron) Start() {
 		}()
 		for {
 			o.step()
-			time.Sleep(tick)
+			Sleep(pollTime)
 		}
 	}()
 }
 
 func (o *Cron) step() {
-	now := uint64(time.Now().Unix())
+	now := Now().UnixNano() * TEST_Scaling / 1000000000
 	if now < o.embargo {
 		return
 	}

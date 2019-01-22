@@ -67,7 +67,7 @@ func (o *CWEmitter) Emit(out chan Volt) {
 	if o.ToneWhenOff {
 		f1 += o.Width
 	}
-	log.Printf("CW EMIT: %v", o)
+	log.Printf("CWEmitter Start: %v", o)
 	gap := func() {
 		if o.ToneWhenOff {
 			PlayTone(f0, f0, BOTH, o.Dit, out)
@@ -94,4 +94,5 @@ func (o *CWEmitter) Emit(out chan Volt) {
 			gap()
 		}
 	}
+	log.Printf("CWEmitter Finish: %v", o)
 }

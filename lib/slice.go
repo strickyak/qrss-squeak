@@ -22,5 +22,4 @@ func (o *Slice) Emit(out chan Volt) {
 	for _, x := range o.Slice {
 		out <- Volt(x)
 	}
-	close(out)
 }
