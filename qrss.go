@@ -19,12 +19,13 @@ type ModeSpec struct {
 }
 
 var Modes = map[string]ModeSpec{
-	"clock1":  ModeSpec{mainDemoClock1, "demo of ticking clock"},
+	"par":    ModeSpec{mainParallelCW, "CW letters in parallel"},
+	"clock1": ModeSpec{mainDemoClock1, "demo of ticking clock"},
 	"demo1":  ModeSpec{mainDemo1, "demo of cron & async"},
-	"cw":   ModeSpec{mainCW, "normal CW (single tone)"},
-	"fscw": ModeSpec{mainFSCW, "Frequency Shift CW (low tone for gaps)"},
-	"dfcw": ModeSpec{mainDFCW, "Dual Frequency CW (high tone for dahs)"},
-	"tfcw": ModeSpec{mainTFCW, "Three Frequency CW (mid-tone for OFF state)"},
+	"cw":     ModeSpec{mainCW, "normal CW (single tone)"},
+	"fscw":   ModeSpec{mainFSCW, "Frequency Shift CW (low tone for gaps)"},
+	"dfcw":   ModeSpec{mainDFCW, "Dual Frequency CW (high tone for dahs)"},
+	"tfcw":   ModeSpec{mainTFCW, "Three Frequency CW (mid-tone for OFF state)"},
 }
 
 func mainCW(text string, flusher func()) Emitter {
@@ -75,6 +76,21 @@ func mainTFCW(text string, flusher func()) Emitter {
 	return NewDFEmitter(o)
 }
 
+func mainParallelCW(text string, flusher func()) Emitter {
+	var inputs []Emitter
+	for i, r := range text {
+		inputs = append(inputs, NewCWEmitter(&CWConf{
+			ToneWhenOff: false,
+			Dit:         time.Second,
+			Freq:        -100 * float64(i),
+			Width:       0,
+			Text:        string(r),
+			Tail:        false,
+		}))
+	}
+	return &Sum{Gain: 1 / float64(len(inputs)), Inputs: inputs}
+}
+
 func mainDemoClock1(text string, flusher func()) Emitter {
 	sum := NewAsyncSum(flusher)
 
@@ -96,7 +112,7 @@ func mainDemoClock1(text string, flusher func()) Emitter {
 	for i := 1; i <= 3; i++ {
 		p2 := &Cron{
 			ModuloSeconds:    10,
-			RemainderSeconds: 10-int64(i),
+			RemainderSeconds: 10 - int64(i),
 			Run: func() {
 				sum.Add(NewCWEmitter(&CWConf{
 					ToneWhenOff: false,
@@ -150,7 +166,7 @@ func mainDemo1(text string, flusher func()) Emitter {
 	for i := 0; i < 4; i++ {
 		p2 := &Cron{
 			ModuloSeconds:    15,
-			RemainderSeconds: 15-int64(i),
+			RemainderSeconds: 15 - int64(i),
 			Run: func() {
 				cw := NewCWEmitter(&CWConf{
 					ToneWhenOff: false,
@@ -179,7 +195,7 @@ func main() {
 	}
 	text := strings.Join(flag.Args(), " ") + " "
 	w := bufio.NewWriter(os.Stdout)
-	flusher := func() {w.Flush()}
+	flusher := func() { w.Flush() }
 	Play(spec.Func(text, flusher), w)
 	w.Flush()
 }
