@@ -39,7 +39,10 @@ func (o *Sum) Emit(out chan Volt) {
 
 	for i, e := range o.Inputs {
 		ch[i] = make(chan Volt, small)
-		go e.Emit(ch[i])
+		go func(j int, x Emitter) {
+			x.Emit(ch[j])
+			close(ch[j])
+		}(i, e)
 	}
 
 	numDone := 0
@@ -59,5 +62,4 @@ func (o *Sum) Emit(out chan Volt) {
 		}
 		out <- Volt(o.Gain) * sum
 	}
-	close(out)
 }
