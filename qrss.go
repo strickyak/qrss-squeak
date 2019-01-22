@@ -14,19 +14,20 @@ import (
 var MODE = flag.String("mode", "", "Which mode to use")
 
 type ModeSpec struct {
-	Func    func(string, *bufio.Writer)
+	Func    func(text string, flusher func()) Emitter
 	Explain string
 }
 
 var Modes = map[string]ModeSpec{
-	"exp":  ModeSpec{mainExp, "experimental"},
+	"clock1":  ModeSpec{mainDemoClock1, "demo of ticking clock"},
+	"demo1":  ModeSpec{mainDemo1, "demo of cron & async"},
 	"cw":   ModeSpec{mainCW, "normal CW (single tone)"},
 	"fscw": ModeSpec{mainFSCW, "Frequency Shift CW (low tone for gaps)"},
 	"dfcw": ModeSpec{mainDFCW, "Dual Frequency CW (high tone for dahs)"},
 	"tfcw": ModeSpec{mainTFCW, "Three Frequency CW (mid-tone for OFF state)"},
 }
 
-func mainCW(text string, w *bufio.Writer) {
+func mainCW(text string, flusher func()) Emitter {
 	o := &CWConf{
 		ToneWhenOff: false,
 		Dit:         *DIT,
@@ -35,10 +36,10 @@ func mainCW(text string, w *bufio.Writer) {
 		Text:        text,
 		Tail:        true,
 	}
-	Play(NewCWEmitter(o), w)
+	return NewCWEmitter(o)
 }
 
-func mainFSCW(text string, w *bufio.Writer) {
+func mainFSCW(text string, flusher func()) Emitter {
 	o := &CWConf{
 		ToneWhenOff: true,
 		Dit:         *DIT,
@@ -47,10 +48,10 @@ func mainFSCW(text string, w *bufio.Writer) {
 		Text:        text,
 		Tail:        true,
 	}
-	Play(NewCWEmitter(o), w)
+	return NewCWEmitter(o)
 }
 
-func mainDFCW(text string, w *bufio.Writer) {
+func mainDFCW(text string, flusher func()) Emitter {
 	o := &DFConf{
 		ToneWhenOff: false,
 		Dit:         *DIT,
@@ -59,10 +60,10 @@ func mainDFCW(text string, w *bufio.Writer) {
 		Text:        text,
 		Tail:        true,
 	}
-	Play(NewDFEmitter(o), w)
+	return NewDFEmitter(o)
 }
 
-func mainTFCW(text string, w *bufio.Writer) {
+func mainTFCW(text string, flusher func()) Emitter {
 	o := &DFConf{
 		ToneWhenOff: true,
 		Dit:         *DIT,
@@ -71,13 +72,49 @@ func mainTFCW(text string, w *bufio.Writer) {
 		Text:        text,
 		Tail:        true,
 	}
-	Play(NewDFEmitter(o), w)
+	return NewDFEmitter(o)
 }
 
-func mainExp(text string, w *bufio.Writer) {
-	flusher := func() {
-		w.Flush()
+func mainDemoClock1(text string, flusher func()) Emitter {
+	sum := NewAsyncSum(flusher)
+
+	p1 := &Cron{
+		ModuloSeconds:    10,
+		RemainderSeconds: 0,
+		Run: func() {
+			sum.Add(NewCWEmitter(&CWConf{
+				ToneWhenOff: false,
+				Dit:         500 * time.Millisecond,
+				Freq:        0,
+				Width:       0,
+				Text:        "e",
+				Tail:        false,
+			}))
+		}}
+	p1.Start()
+
+	for i := 1; i <= 3; i++ {
+		p2 := &Cron{
+			ModuloSeconds:    10,
+			RemainderSeconds: 10-int64(i),
+			Run: func() {
+				sum.Add(NewCWEmitter(&CWConf{
+					ToneWhenOff: false,
+					Dit:         100 * time.Millisecond,
+					Freq:        0,
+					Width:       0,
+					Text:        "e",
+					Tail:        false,
+				}))
+			}}
+		p2.Start()
 	}
+
+	return sum
+
+}
+
+func mainDemo1(text string, flusher func()) Emitter {
 	sum := NewAsyncSum(flusher)
 	p1 := &Cron{
 		ModuloSeconds:    20,
@@ -109,7 +146,26 @@ func mainExp(text string, w *bufio.Writer) {
 			sum.Add(&Gain{0.5, cw})
 		}}
 	p2.Start()
-	Play(sum, w)
+
+	for i := 0; i < 4; i++ {
+		p2 := &Cron{
+			ModuloSeconds:    15,
+			RemainderSeconds: 15-int64(i),
+			Run: func() {
+				cw := NewCWEmitter(&CWConf{
+					ToneWhenOff: false,
+					Dit:         100 * time.Millisecond,
+					Freq:        500,
+					Width:       0,
+					Text:        "e",
+					Tail:        false,
+				})
+				sum.Add(&Gain{0.5, cw})
+			}}
+		p2.Start()
+	}
+
+	return sum
 }
 
 func main() {
@@ -123,6 +179,7 @@ func main() {
 	}
 	text := strings.Join(flag.Args(), " ") + " "
 	w := bufio.NewWriter(os.Stdout)
-	spec.Func(text, w)
+	flusher := func() {w.Flush()}
+	Play(spec.Func(text, flusher), w)
 	w.Flush()
 }
