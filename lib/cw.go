@@ -10,7 +10,7 @@ type CWConf struct {
 	ToneWhenOff bool
 	Dit         time.Duration
 	Freq        float64
-	Width       float64
+	Bandwidth   float64
 	Morse       []DiDah
 	Text        string
 	Tail        bool
@@ -56,7 +56,7 @@ func (o *CWEmitter) Duration() time.Duration {
 
 func (o *CWEmitter) String() string {
 	if o.ToneWhenOff {
-		return fmt.Sprintf("CWEmitter{ToneWhenOff,text=%q,morse=%q,freq=%.1f,width=%.1f,dit=%v,total=%v}", o.Text, o.Morse, o.Freq, o.Width, o.Dit, o.Total)
+		return fmt.Sprintf("CWEmitter{ToneWhenOff,text=%q,morse=%q,freq=%.1f,width=%.1f,dit=%v,total=%v}", o.Text, o.Morse, o.Freq, o.Bandwidth, o.Dit, o.Total)
 	} else {
 		return fmt.Sprintf("CWEmitter{text=%q,morse=%q,freq=%.1f,dit=%v,total=%v}", o.Text, o.Morse, o.Freq, o.Dit, o.Total)
 	}
@@ -65,7 +65,7 @@ func (o *CWEmitter) String() string {
 func (o *CWEmitter) Emit(out chan Volt) {
 	f0, f1 := o.Freq, o.Freq // OFF, ON frequencies.
 	if o.ToneWhenOff {
-		f1 += o.Width
+		f1 += o.Bandwidth
 	}
 	log.Printf("CWEmitter Start: %v", o)
 	gap := func() {

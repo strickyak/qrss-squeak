@@ -5,8 +5,6 @@ import (
 	"time"
 )
 
-var InfiniteDuration = 100 * 366 * 24 * time.Hour // A hundred years.
-
 // AsyncSum must be created with NewAsyncSum().
 // Then you can add Emitters to it with Add().
 // Those Emitters may be finite or infinite.

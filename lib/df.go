@@ -10,7 +10,7 @@ type DFConf struct {
 	ToneWhenOff bool
 	Dit         time.Duration
 	Freq        float64
-	Width       float64
+	Bandwidth   float64
 	Morse       []DiDah
 	Text        string
 	Tail        bool
@@ -42,15 +42,15 @@ func (o *DFEmitter) Duration() time.Duration {
 
 func (o *DFEmitter) String() string {
 	if o.ToneWhenOff {
-		return fmt.Sprintf("DFEmitter{ToneWhenOff,text=%q,morse=%q,freq=%.1f,width=%.1f,dit=%v,total=%v}", o.Text, o.Morse, o.Freq, o.Width, o.Dit, o.Total)
+		return fmt.Sprintf("DFEmitter{ToneWhenOff,text=%q,morse=%q,freq=%.1f,width=%.1f,dit=%v,total=%v}", o.Text, o.Morse, o.Freq, o.Bandwidth, o.Dit, o.Total)
 	} else {
-		return fmt.Sprintf("DFEmitter{text=%q,morse=%q,freq=%.1f,width=%.1f,dit=%v,total=%v}", o.Text, o.Morse, o.Freq, o.Width, o.Dit, o.Total)
+		return fmt.Sprintf("DFEmitter{text=%q,morse=%q,freq=%.1f,width=%.1f,dit=%v,total=%v}", o.Text, o.Morse, o.Freq, o.Bandwidth, o.Dit, o.Total)
 	}
 }
 
 func (o *DFEmitter) Emit(out chan Volt) {
 	log.Printf("DFEmitter Start: %v", o)
-	f0, f1, f2 := o.Freq, o.Freq, o.Freq+o.Width // OFF, Dit, Dah frequencies.
+	f0, f1, f2 := o.Freq, o.Freq, o.Freq+o.Bandwidth // OFF, Dit, Dah frequencies.
 	if o.ToneWhenOff {
 		f0 = (f1 + f2) / 2
 	}
