@@ -117,11 +117,11 @@ func mainParallelCW(text string, flusher func()) Emitter {
 			Tail:        false,
 		}))
 	}
-	return &Sum{Gain: 1 / float64(len(inputs)), Inputs: inputs}
+	return &Mixer{Gain: 1 / float64(len(inputs)), Inputs: inputs}
 }
 
 func mainDemoClock(text string, flusher func()) Emitter {
-	sum := NewAsyncSum(flusher)
+	sum := NewAsyncMixer(flusher)
 
 	p1 := &Cron{
 		ModuloSeconds:    10,
@@ -160,7 +160,7 @@ func mainDemoClock(text string, flusher func()) Emitter {
 }
 
 func mainDemoJunk(text string, flusher func()) Emitter {
-	sum := NewAsyncSum(flusher)
+	sum := NewAsyncMixer(flusher)
 	p1 := &Cron{
 		ModuloSeconds:    20,
 		RemainderSeconds: 0,
@@ -227,7 +227,7 @@ func main() {
 	flusher := func() { w.Flush() }
 
 	if *LOOP > 0 {
-		sum := NewAsyncSum(flusher)
+		sum := NewAsyncMixer(flusher)
 		cron := &Cron{
 			ModuloSeconds:    *LOOP,
 			RemainderSeconds: *LOOP_OFFSET,

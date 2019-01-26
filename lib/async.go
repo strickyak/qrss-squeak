@@ -5,31 +5,31 @@ import (
 	"time"
 )
 
-// AsyncSum must be created with NewAsyncSum().
+// AsyncMixer must be created with NewAsyncMixer().
 // Then you can add Emitters to it with Add().
 // Those Emitters may be finite or infinite.
 // You can add more Emitters later at any time.
-// The AsyncSum will pause writing voltages to its output channel
+// The AsyncMixer will pause writing voltages to its output channel
 // while there are no inputs, so this should be the final thing
-// before Output().   AsyncSum is an infinite Emitter,
+// before Output().   AsyncMixer is an infinite Emitter,
 // but may have long (or infinite) pauses.  The flusher input
-// is a function that gets called when the AsyncSum pauses.
+// is a function that gets called when the AsyncMixer pauses.
 // It should flush pending output so it is not held in buffers
 // during pauses.
-type AsyncSum struct {
+type AsyncMixer struct {
 	channels []chan Volt
 	adding   chan chan Volt
 	flusher  func()
 }
 
-func NewAsyncSum(flusher func()) *AsyncSum {
-	return &AsyncSum{
+func NewAsyncMixer(flusher func()) *AsyncMixer {
+	return &AsyncMixer{
 		adding:  make(chan chan Volt, small),
 		flusher: flusher,
 	}
 }
 
-func (o *AsyncSum) Add(e Emitter) {
+func (o *AsyncMixer) Add(e Emitter) {
 	ch := make(chan Volt)
 	go func() {
 		e.Emit(ch)
@@ -38,12 +38,12 @@ func (o *AsyncSum) Add(e Emitter) {
 	o.adding <- ch
 }
 
-func (o *AsyncSum) Duration() time.Duration {
+func (o *AsyncMixer) Duration() time.Duration {
 	return InfiniteDuration // Never stops -- but may have many long gaps.
 }
 
-func (o *AsyncSum) String() string {
-	return "AsyncSum{}"
+func (o *AsyncMixer) String() string {
+	return "AsyncMixer{}"
 }
 
 func sliceContainsInt(vec []int, x int) bool {
@@ -55,7 +55,7 @@ func sliceContainsInt(vec []int, x int) bool {
 	return false
 }
 
-func (o *AsyncSum) Emit(out chan Volt) {
+func (o *AsyncMixer) Emit(out chan Volt) {
 	for {
 		// First look for a new channel being added.
 		// Just take one; we can get another on the next loop.
@@ -69,7 +69,7 @@ func (o *AsyncSum) Emit(out chan Volt) {
 			}
 		} else {
 			o.flusher() // Flush before blocking!
-			log.Printf("AsyncSum blocking.")
+			log.Printf("AsyncMixer blocking.")
 			e, ok := <-o.adding // Block.
 			if !ok {
 				log.Fatalf("Not expecting `adding` to close.")

@@ -6,13 +6,13 @@ import (
 	. "time"
 )
 
-func TestAsyncSum1(t *testing.T) {
+func TestAsyncMixer1(t *testing.T) {
 	count := make(chan struct{}, 1)
 	nop := func() {
 		count <- struct{}{}
 	}
 
-	a := NewAsyncSum(nop)
+	a := NewAsyncMixer(nop)
 
 	ch := make(chan Volt, small)
 	go a.Emit(ch)

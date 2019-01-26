@@ -6,12 +6,12 @@ import (
 	"time"
 )
 
-type Sum struct {
+type Mixer struct {
 	Gain   float64
 	Inputs []Emitter
 }
 
-func (o *Sum) Duration() time.Duration {
+func (o *Mixer) Duration() time.Duration {
 	var z time.Duration
 	for _, e := range o.Inputs {
 		d := e.Duration()
@@ -22,9 +22,9 @@ func (o *Sum) Duration() time.Duration {
 	return z
 }
 
-func (o *Sum) String() string {
+func (o *Mixer) String() string {
 	var bb bytes.Buffer
-	fmt.Fprintf(&bb, "Sum{%f, ", o.Gain)
+	fmt.Fprintf(&bb, "Mixer{%f, ", o.Gain)
 	for _, e := range o.Inputs {
 		fmt.Fprintf(&bb, "%v, ", e)
 	}
@@ -32,7 +32,7 @@ func (o *Sum) String() string {
 	return bb.String()
 }
 
-func (o *Sum) Emit(out chan Volt) {
+func (o *Mixer) Emit(out chan Volt) {
 	numInputs := len(o.Inputs)
 	done := make([]bool, numInputs)
 	ch := make([]chan Volt, numInputs)
