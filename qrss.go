@@ -8,6 +8,10 @@
 //   --mode=cw     (or any other mode defined in Modes below)
 //   --rate=44100  (matches the --rate flag to paplay)
 //   --dit=0.1s    (dit time.  Add "s" for seconds.)
+//
+// Demo:
+// go run ../qrss.go -mode=cw -dit=0.1 -loop=5 hi hi | paplay --rate=44100 --channels=1 --format=s16le --raw /dev/stdin
+
 package main
 
 // TODO -- fix zero values to defaults.
@@ -24,8 +28,8 @@ import (
 )
 
 var MODE = flag.String("mode", "", "Which mode to use.")
-var MODULUS = flag.Int64("modulus", 0, "Repeat modulo this many seconds.  If 0, do not repeat.")
-var REMAINDER = flag.Int64("remainder", 0, "Offset seconds within the modulo loop.")
+var LOOP = flag.Int64("loop", 0, "Repeat using this many seconds.  If 0, do not repeat.  Synchronizes to UNIX time modulo this many seconds.")
+var LOOP_OFFSET = flag.Int64("loop_offset", 0, "Offset seconds within the loop.")
 
 type ModeSpec struct {
 	Func    func(text string, flusher func()) Emitter
@@ -222,11 +226,11 @@ func main() {
 	w := bufio.NewWriter(os.Stdout)
 	flusher := func() { w.Flush() }
 
-	if *MODULUS > 0 {
+	if *LOOP > 0 {
 		sum := NewAsyncSum(flusher)
 		cron := &Cron{
-			ModuloSeconds:    *MODULUS,
-			RemainderSeconds: *REMAINDER,
+			ModuloSeconds:    *LOOP,
+			RemainderSeconds: *LOOP_OFFSET,
 			Run: func() {
 				sum.Add(m.Func(text, flusher))
 			}}
