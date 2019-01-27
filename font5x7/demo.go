@@ -1,7 +1,10 @@
 // +build main
 
 /*
-   Usage:    go run demo.go "The quick brown fox" | less
+   Usage:    go run demo.go "The quick brown fox"
+
+             go run demo.go | less
+	        shows all 256 chars.
 */
 package main
 
@@ -45,9 +48,14 @@ func renderVertical(bitmap []byte) {
 }
 
 func main() {
-	s := "Let my people go!" // String to print.
+	var s string
 	if len(os.Args) >= 2 {
 		s = strings.Join(os.Args[1:], " ") // String to print.
+	} else {
+		// Show all 256 chars, if no Args.
+		for ch := 0; ch < 256; ch++ {
+			s += string(ch)
+		}
 	}
 
 	bitmap := F.VerticalStringFiveBitsWide(s)
