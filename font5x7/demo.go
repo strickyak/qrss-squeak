@@ -61,6 +61,6 @@ func main() {
 	bitmap := F.VerticalStringFiveBitsWide(s)
 	renderVertical(bitmap)
 
-	rows := F.SevenHorizontalRowsOfBool(s)
+	rows := F.EightHorizontalRowsOfBool(s)
 	renderHorizontal(rows)
 }

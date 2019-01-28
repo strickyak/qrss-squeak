@@ -6,7 +6,7 @@ package font5x7
 import "log"
 
 /*
-SevenHorizontalRowsOfBool returns a slice of length 8 where each element is a slice of bool.
+EightHorizontalRowsOfBool returns a slice of length 8 where each element is a slice of bool.
 The outer slice goes down, and the inner slices go across, to print like this (with '#' for true and '_' for false):
 
 #_____________#____________________________________________________##_____________________________#___
@@ -19,7 +19,7 @@ The outer slice goes down, and the inner slices go across, to print like this (w
 _______________________________###________#_________________#________________________###______________
 
 */
-func SevenHorizontalRowsOfBool(s string) [][]bool {
+func EightHorizontalRowsOfBool(s string) [][]bool {
 	var z [][]bool
 	for row := 0; row < 8; row++ { // For row in 0..6 inclusive
 		var y []bool

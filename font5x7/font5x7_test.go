@@ -13,20 +13,21 @@ func ExpectDeepEqual(t *T, got, want interface{}) {
 
 func TestVerticalStringFiveBitsWide(t *T) {
 	got := VerticalStringFiveBitsWide("Hi.")
-	want := []byte("\x11\x11\x11\x1f\x11\x11\x11\x00\x00\x04\x00\f\x04\x04\x04\x0e\x00\x00\x00\x00\x00\x00\x00\f\f\x00\x00")
+	want := []byte{0x11, 0x11, 0x11, 0x1f, 0x11, 0x11, 0x11, 0x0, 0x0, 0x4, 0x0, 0xc, 0x4, 0x4, 0x4, 0xe, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x6, 0x6, 0x0, 0x0}
 	ExpectDeepEqual(t, got, want)
 }
 
-func TestSevenHorizontalRowsOfBool(t *T) {
-	got := SevenHorizontalRowsOfBool("Jó napot!")
+func TestEightHorizontalRowsOfBool(t *T) {
+	got := EightHorizontalRowsOfBool("Jó napot!")
 	want := [][]bool{
-		[]bool{false, false, true, true, true, false, false, true, true, true, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, true, false, false, false, false, false, false, true, false, false, false},
-		[]bool{false, false, false, true, false, false, true, false, false, false, true, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, true, false, false, false, false, false, false, true, false, false, false},
-		[]bool{false, false, false, true, false, false, false, false, false, false, true, false, false, false, false, false, false, false, true, false, true, true, false, false, false, true, true, true, false, false, true, true, true, true, false, false, false, true, true, true, false, false, true, true, true, false, false, false, false, false, true, false, false, false},
-		[]bool{false, false, false, true, false, false, false, false, false, true, false, false, false, false, false, false, false, false, true, true, false, false, true, false, false, false, false, false, true, false, true, false, false, false, true, false, true, false, false, false, true, false, false, true, false, false, false, false, false, false, true, false, false, false},
-		[]bool{false, false, false, true, false, false, false, false, true, false, false, false, false, false, false, false, false, false, true, false, false, false, true, false, false, true, true, true, true, false, true, true, true, true, false, false, true, false, false, false, true, false, false, true, false, false, false, false, false, false, true, false, false, false},
-		[]bool{true, false, false, true, false, false, false, false, false, false, false, false, false, false, false, false, false, false, true, false, false, false, true, false, true, false, false, false, true, false, true, false, false, false, false, false, true, false, false, false, true, false, false, true, false, false, true, false, false, false, false, false, false, false},
-		[]bool{false, true, true, false, false, false, false, false, true, false, false, false, false, false, false, false, false, false, true, false, false, false, true, false, false, true, true, true, true, false, true, false, false, false, false, false, false, true, true, true, false, false, false, false, true, true, false, false, false, false, true, false, false, false},
+		[]bool{false, false, true, true, true, false, false, false, false, true, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, true, false, false, false, false, false, true, false, false, false},
+		[]bool{false, false, false, true, false, false, false, false, true, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, true, false, false, false, false, false, true, false, false, false},
+		[]bool{false, false, false, true, false, false, false, true, false, false, false, false, false, false, false, false, false, false, true, false, true, true, false, false, false, true, true, false, false, false, true, false, true, true, false, false, false, true, true, true, false, false, true, true, true, true, true, false, false, false, true, false, false, false},
+		[]bool{false, false, false, true, false, false, false, false, true, false, false, false, false, false, false, false, false, false, true, true, false, false, true, false, false, false, false, true, false, false, true, true, false, false, true, false, true, false, false, false, true, false, false, false, true, false, false, false, false, false, true, false, false, false},
+		[]bool{false, false, false, true, false, false, false, false, false, true, false, false, false, false, false, false, false, false, true, false, false, false, true, false, false, true, true, true, false, false, true, true, false, false, true, false, true, false, false, false, true, false, false, false, true, false, false, false, false, false, true, false, false, false},
+		[]bool{true, false, false, true, false, false, false, false, false, false, false, false, false, false, false, false, false, false, true, false, false, false, true, false, true, false, false, true, false, false, true, false, true, true, false, false, true, false, false, false, true, false, false, false, true, false, true, false, false, false, false, false, false, false},
+		[]bool{false, true, true, false, false, false, true, true, true, true, true, false, false, false, false, false, false, false, true, false, false, false, true, false, false, true, true, true, true, false, true, false, false, false, false, false, false, true, true, true, false, false, false, false, false, true, false, false, false, false, true, false, false, false},
+		[]bool{false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, true, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false},
 	}
 	ExpectDeepEqual(t, got, want)
 }
