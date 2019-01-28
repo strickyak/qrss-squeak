@@ -42,18 +42,20 @@ func (o *DFEmitter) Duration() time.Duration {
 
 func (o *DFEmitter) String() string {
 	if o.ToneWhenOff {
-		return fmt.Sprintf("DFEmitter{ToneWhenOff,text=%q,morse=%q,freq=%.1f,width=%.1f,dit=%v,total=%v}", o.Text, o.Morse, o.Freq, o.Bandwidth, o.Dit, o.Total)
+		return fmt.Sprintf(
+			"DFEmitter{ToneWhenOff,text=%q,morse=%q,freq=%.1f,width=%.1f,dit=%v,total=%v}",
+			o.Text, o.Morse, o.Freq, o.Bandwidth, o.Dit, o.Total)
 	} else {
-		return fmt.Sprintf("DFEmitter{text=%q,morse=%q,freq=%.1f,width=%.1f,dit=%v,total=%v}", o.Text, o.Morse, o.Freq, o.Bandwidth, o.Dit, o.Total)
+		return fmt.Sprintf(
+			"DFEmitter{text=%q,morse=%q,freq=%.1f,width=%.1f,dit=%v,total=%v}",
+			o.Text, o.Morse, o.Freq, o.Bandwidth, o.Dit, o.Total)
 	}
 }
 
 func (o *DFEmitter) Emit(out chan Volt) {
 	log.Printf("DFEmitter Start: %v", o)
-	f0, f1, f2 := o.Freq, o.Freq, o.Freq+o.Bandwidth // OFF, Dit, Dah frequencies.
-	if o.ToneWhenOff {
-		f0 = (f1 + f2) / 2
-	}
+	f1, f2 := o.Freq, o.Freq+o.Bandwidth // OFF, Dit, Dah frequencies.
+	f0 := (f1 + f2) / 2
 	gap := func() {
 		if o.ToneWhenOff {
 			PlayTone(f0, f0, BOTH, o.Dit, out)
@@ -62,9 +64,7 @@ func (o *DFEmitter) Emit(out chan Volt) {
 		}
 	}
 
-	lenMorse, i := len(o.Morse), 0
 	for _, didah := range o.Morse {
-		i++
 		switch didah {
 		case '.':
 			PlayTone(f1, f1, BOTH, o.Dit, out)
@@ -74,10 +74,6 @@ func (o *DFEmitter) Emit(out chan Volt) {
 			gap()
 		default:
 			log.Fatalf("bad didah: %d in %q", didah, o.Text)
-		}
-
-		if o.Tail || i < lenMorse {
-			gap()
 		}
 	}
 	log.Printf("DFEmitter Finish: %v", o)
