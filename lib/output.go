@@ -25,13 +25,15 @@ func Output(volts chan Volt, w *bufio.Writer, done chan bool) {
 		y := *GAIN * float64(volt)
 		// Clip hard at +/- 1 unit.
 		if y > 1.0 {
-			if !*CLIP {
+			// allow clipping 1% just for unexplained rounding errors.
+			if y > 1.01 && !*CLIP {
 				log.Panicf("Clipping not allowed without --clip flag: y=%g", y)
 			}
 			y = 1.0
 		}
 		if y < -1.0 {
-			if !*CLIP {
+			// allow clipping 1% just for unexplained rounding errors.
+			if y < -1.01 && !*CLIP {
 				log.Panicf("Clipping not allowed without --clip flag: y=%g", y)
 			}
 			y = -1.0
