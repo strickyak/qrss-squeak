@@ -68,10 +68,10 @@ func (o *HellEmitter) Emit(out chan Volt) {
 			Tail:  o.Tail,
 		}))
 	}
-	m := &Mixer{
-		Gain:   1 / 8,
+	mixer := &Mixer{
+		Gain:   1.0 / 8.0,
 		Inputs: inputs,
 	}
-	m.Emit(out)
+	mixer.Emit(out)
 	log.Printf("HellEmitter Finish: %v", o)
 }

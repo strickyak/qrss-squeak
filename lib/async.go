@@ -1,9 +1,15 @@
 package lib
 
 import (
+	"flag"
 	"log"
+	"os/exec"
+	"strings"
 	"time"
 )
+
+var TX_ON = flag.String("tx_on", "", "Shell command to run to turn transmitter on.")
+var TX_OFF = flag.String("tx_off", "", "Shell command to run to turn transmitter off.  Should sleep first for player buffer to empty.")
 
 // AsyncMixer must be created with NewAsyncMixer().
 // Then you can add Emitters to it with Add().
@@ -26,6 +32,23 @@ func NewAsyncMixer(flusher func()) *AsyncMixer {
 	return &AsyncMixer{
 		adding:  make(chan chan Volt, small),
 		flusher: flusher,
+	}
+}
+
+func Transmit(on bool) {
+	var command string
+	if on {
+		command = *TX_ON
+	} else {
+		command = *TX_OFF
+	}
+	if len(strings.TrimSpace(command)) == 0 {
+		return // No command.
+	}
+	log.Printf("Transmitter (%v) Command: %q", on, command)
+	err := exec.Command("/bin/bash", "-c", "set -x; "+command).Run()
+	if err != nil {
+		log.Fatalf("FATAL: Transmitter Error: %q: %v", command, err)
 	}
 }
 
@@ -56,6 +79,7 @@ func sliceContainsInt(vec []int, x int) bool {
 }
 
 func (o *AsyncMixer) Emit(out chan Volt) {
+	Transmit(true)
 	for {
 		// First look for a new channel being added.
 		// Just take one; we can get another on the next loop.
@@ -69,11 +93,13 @@ func (o *AsyncMixer) Emit(out chan Volt) {
 			}
 		} else {
 			o.flusher() // Flush before blocking!
+			Transmit(false)
 			log.Printf("AsyncMixer blocking.")
 			e, ok := <-o.adding // Block.
 			if !ok {
 				log.Fatalf("Not expecting `adding` to close.")
 			}
+			Transmit(true)
 			o.channels = append(o.channels, e)
 		}
 
