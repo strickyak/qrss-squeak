@@ -14,6 +14,7 @@ type CWConf struct {
 	Morse       []DiDah
 	Text        string
 	Tail        bool
+	NoGap       bool // TODO: get rid of quick hack
 }
 type CWEmitter struct {
 	CWConf
@@ -37,9 +38,17 @@ func (o *CWEmitter) DurationInDits() float64 {
 	for _, didah := range o.Morse {
 		switch didah {
 		case '.', ' ':
-			n += 2 // 1 for ON, 1 for OFF.
+			if o.NoGap {
+				n += 1 // 1 for ON, 1 for OFF.
+			} else {
+				n += 2 // 1 for ON, 1 for OFF.
+			}
 		case '-':
-			n += 4 // 3 for ON, 1 for OFF.
+			if o.NoGap {
+				n += 3 // 3 for ON, 1 for OFF.
+			} else {
+				n += 4 // 3 for ON, 1 for OFF.
+			}
 		default:
 			log.Fatalf("bad didah: %d in %q", didah, o.Text)
 		}
@@ -91,7 +100,9 @@ func (o *CWEmitter) Emit(out chan Volt) {
 		}
 
 		if o.Tail || i < lenMorse {
-			gap()
+			if !o.NoGap {
+				gap()
+			}
 		}
 	}
 	log.Printf("CWEmitter Finish: %v", o)

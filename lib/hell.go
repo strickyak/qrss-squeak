@@ -66,6 +66,7 @@ func (o *HellEmitter) Emit(out chan Volt) {
 			Freq:  o.Bandwidth * (1.0 - float64(i)/7),
 			Morse: boolSliceToDiDahSlice(row),
 			Tail:  o.Tail,
+			NoGap: true, // TODO: get rid of this hack.
 		}))
 	}
 	mixer := &Mixer{
