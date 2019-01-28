@@ -38,10 +38,11 @@ type ModeSpec struct {
 
 var Modes = map[string]ModeSpec{
 	// Usual modes:
-	"cw": ModeSpec{mainCW, "normal CW (single tone)"},
-	"fs": ModeSpec{mainFSCW, "Frequency Shift CW (low tone for gaps)"},
-	"df": ModeSpec{mainDFCW, "Dual Frequency CW (high tone for dahs)"},
-	"tf": ModeSpec{mainTFCW, "Three Frequency CW (mid-tone for OFF state)"},
+	"cw":   ModeSpec{mainCW, "normal CW (single tone)"},
+	"fs":   ModeSpec{mainFSCW, "Frequency Shift CW (low tone for gaps)"},
+	"df":   ModeSpec{mainDFCW, "Dual Frequency CW (high tone for dahs)"},
+	"tf":   ModeSpec{mainTFCW, "Three Frequency CW (mid-tone for OFF state)"},
+	"hell": ModeSpec{mainHell, "Hellschreiber: print human-readable ASCII directly in spectrum"},
 
 	// Weird modes:
 	"par": ModeSpec{mainParallelCW, "CW letters in parallel (polyphonic)"},
@@ -99,21 +100,29 @@ func mainTFCW(text string, flusher func()) Emitter {
 	return NewDFEmitter(o)
 }
 
-func mainParallelCW(text string, flusher func()) Emitter {
-	text = strings.TrimSpace(text)
-	var inputs []Emitter
-	n := 0
-	for _, _ = range text {
-		n++
+func mainHell(text string, flusher func()) Emitter {
+	o := &HellConf{
+		Dit:       Secs(*DIT),
+		Freq:      0,
+		Bandwidth: *BW,
+		Text:      text,
+		Tail:      true,
 	}
-	delta := *BW / float64(n) // Difference between to neighboring CW frequenices, in Hertz.
-	for i, r := range text {
+	return NewHellEmitter(o)
+}
+
+func mainParallelCW(text string, flusher func()) Emitter {
+	texts := strings.Split(strings.TrimSpace(text), ";")
+	n := len(texts)
+	delta := *BW / float64(n-1) // Difference between neighboring CW frequenices, in Hertz.
+	var inputs []Emitter
+	for i, s := range texts {
 		inputs = append(inputs, NewCWEmitter(&CWConf{
 			ToneWhenOff: false,
 			Dit:         Secs(*DIT),
-			Freq:        *BW - ((float64(i) + 0.5) * delta),
+			Freq:        *BW - ((float64(i)) * delta),
 			Bandwidth:   0,
-			Text:        string(r),
+			Text:        s,
 			Tail:        false,
 		}))
 	}
