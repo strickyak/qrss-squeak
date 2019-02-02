@@ -11,7 +11,6 @@
 //
 // Demo:
 // go run ../qrss.go -mode=cw -dit=0.1 -loop=5 hi hi | paplay --rate=44100 --channels=1 --format=s16le --raw /dev/stdin
-
 package main
 
 // TODO -- fix zero values to defaults.
