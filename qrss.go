@@ -49,6 +49,7 @@ var Modes = map[string]ModeSpec{
 
 	// Not useful execpt as demos:
 	"demo-clock": ModeSpec{mainDemoClock, "demo of ticking clock"},
+	"demo-4":     ModeSpec{mainDemoFour, "demo of four modes every 20 minutes"},
 	"demo-junk":  ModeSpec{mainDemoJunk, "demo of cron & async"},
 }
 
@@ -166,6 +167,79 @@ func mainDemoClock(text string) Emitter {
 
 	return sum
 
+}
+
+func mainDemoFour(text string) Emitter {
+	sum := NewAsyncMixer()
+
+	p1 := &Cron{ // CW
+		ModuloSeconds:    20 * 60,    // twenty minutes
+		RemainderSeconds: 0*300 + 10, // 00:00:10
+		Run: func() {
+			cw := NewCWEmitter(&CWConf{
+				ToneWhenOff: false,
+				Dit:         100 * time.Millisecond,
+				Freq:        0,
+				Bandwidth:   0,
+				Text:        text,
+				Tail:        true,
+			})
+			AdjustDuration(cw, 150*time.Second)
+			sum.Add(&Gain{0.25, cw})
+		}}
+	p1.Start()
+
+	p2 := &Cron{ // Dual Frequency
+		ModuloSeconds:    20 * 60,    // twenty minutes
+		RemainderSeconds: 1*300 + 10, // 00:05:10
+		Run: func() {
+			df := NewDFEmitter(&DFConf{
+				ToneWhenOff: false,
+				Dit:         100 * time.Millisecond,
+				Freq:        0,
+				Bandwidth:   8,
+				Text:        text,
+				Tail:        true,
+			})
+			AdjustDuration(df, 150*time.Second)
+			sum.Add(&Gain{0.25, df})
+		}}
+	p2.Start()
+
+	p3 := &Cron{ // Frequency Shift
+		ModuloSeconds:    20 * 60,    // twenty minutes
+		RemainderSeconds: 2*300 + 10, // 00:10:10
+		Run: func() {
+			fs := NewCWEmitter(&CWConf{
+				ToneWhenOff: true,
+				Dit:         100 * time.Millisecond,
+				Freq:        0,
+				Bandwidth:   8,
+				Text:        text,
+				Tail:        true,
+			})
+			AdjustDuration(fs, 150*time.Second)
+			sum.Add(&Gain{0.25, fs})
+		}}
+	p3.Start()
+
+	p4 := &Cron{ // Frequency Shift
+		ModuloSeconds:    20 * 60,    // twenty minutes
+		RemainderSeconds: 3*300 + 10, // 00:15:10
+		Run: func() {
+			hell := NewHellEmitter(&HellConf{
+				Dit:       Secs(*DIT),
+				Freq:      0,
+				Bandwidth: 15,
+				Text:      text,
+				Tail:      true,
+			})
+			AdjustDuration(hell, 150*time.Second)
+			sum.Add(&Gain{0.25, hell})
+		}}
+	p4.Start()
+
+	return sum
 }
 
 func mainDemoJunk(text string) Emitter {
