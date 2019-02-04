@@ -56,6 +56,16 @@ $ go run qrss.go -mode=df -bw=10 -dit=0.3 -x  vvv de q1rss/b
 2019/02/02 15:05:38 Play: DFEmitter{text="vvv de q1rss/b",morse="...- ...- ...-   -.. .   --.- .---- .-. ... ... -..-. -... ",freq=0.0,width=10.0,dit=300ms,total=17.7s}
 ```
 
+## Getting started in the Go language
+
+*   Always start at https://golang.org/ and follow the `Download Go` link from there.
+*   Download and install the binary distrubution for your platform.
+*   Either put the `bin` directory of the go distribution in your PATH, or type the absolute path for the `go` command, below.
+*   In your home directory, `mkdir ~/go` and `mkdir ~/go/src` and `cd ~/go/src`
+*   `go get -u github.com/strickyak/qrss-squeak`
+*   `cd github.com/strickyak/qrss-squeak`
+*   `go run qrss.go -help` should print some help.
+
 ## Command Line Reference
 
 ### Usage
