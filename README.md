@@ -12,26 +12,20 @@ Divide 1.2 by the desired words-per-minute to get the "dit" time in seconds.
 
 1.2 / 12 = 0.1, so for 12 WPM use -dit=0.1:
 
-The ramp time is the duration of the "ramp up" and "ramp down" envelope
-using a "raised cosine" shape at the start and finish of each dit.
-The longer the ramp, the less the splatter into neighboring frequencies.
-As a rule of thumb, you might set it to 5% or 10% of the dit time.
-The -ramp parameter is specified in seconds.
-
 ```
-go run qrss.go -mode=cw -dit=0.1 -ramp=0.01  vvv de q1rss/b |
+go run qrss.go -mode=cw -dit=0.1 vvv de q1rss/b |
   paplay --rate=44100 --channels=1 --format=s16le --raw /dev/stdin
 ```
 
 Repeating that every 20 seconds, at 0, 20, and 40 seconds after the full minute:
 ```
-go run qrss.go -loop=20 --mode=cw --dit=0.1 --ramp=0.01  vvv de q1rss/b |
+go run qrss.go -loop=20 --mode=cw --dit=0.1 vvv de q1rss/b |
   paplay --rate=44100 --channels=1 --format=s16le --raw /dev/stdin
 ```
 
 Repeating that every 20 seconds, at 5, 25, and 45 seconds after the full minute:
 ```
-go run qrss.go loop_ofset=5 -loop=20 --mode=cw --dit=0.1 --ramp=0.01  vvv de q1rss/b |
+go run qrss.go loop_ofset=5 -loop=20 --mode=cw --dit=0.1 vvv de q1rss/b |
   paplay --rate=44100 --channels=1 --format=s16le --raw /dev/stdin
 ```
 
@@ -39,7 +33,7 @@ go run qrss.go loop_ofset=5 -loop=20 --mode=cw --dit=0.1 --ramp=0.01  vvv de q1r
 This uses 100Hz of bandwidth so you can hear the different tones if you
 listen to it.  You can tighten the bandwith like to 5hz ( -bw=5 ) for QRSS.
 ```
-go run qrss.go -mode=df -bw=100 -dit=0.3 -ramp=0.05   vvv de q1rss/b |
+go run qrss.go -mode=df -bw=100 -dit=0.3 vvv de q1rss/b |
   paplay --rate=44100 --channels=1 --format=s16le --raw /dev/stdin
 ```
 
@@ -49,7 +43,7 @@ Add `-x` to dump debug info and exit.  You can use this to get the duration of t
 In this eamples, it prints that it will last 17.7 seconds.
 
 ```
-$ go run qrss.go -mode=df -bw=10 -dit=0.3 -ramp=0.05 -x  vvv de q1rss/b
+$ go run qrss.go -mode=df -bw=10 -dit=0.3 -x  vvv de q1rss/b
 2019/02/02 15:05:38 Play: DFEmitter{text="vvv de q1rss/b",morse="...- ...- ...-   -.. .   --.- .---- .-. ... ... -..-. -... ",freq=0.0,width=10.0,dit=300ms,total=17.7s}
 ```
 

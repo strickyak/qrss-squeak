@@ -7,13 +7,7 @@ import (
 )
 
 func TestAsyncMixer1(t *testing.T) {
-	count := make(chan struct{}, 1)
-	nop := func() {
-		count <- struct{}{}
-	}
-
-	a := NewAsyncMixer(nop)
-
+	a := NewAsyncMixer()
 	ch := make(chan Volt, small)
 	go a.Emit(ch)
 
@@ -29,6 +23,7 @@ func TestAsyncMixer1(t *testing.T) {
 
 	counter := 0
 	var sum Volt
+	count := make(chan struct{}, 1)
 Loop:
 	for {
 		select {

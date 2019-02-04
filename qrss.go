@@ -2,7 +2,7 @@
 // Emits raw s16be mono audio to stdout.
 //
 // Usage:
-//   go run qrss.go [flags] [words] | paplay --rate=44100 --channels=1 --format=s16le --raw --latency-msec=30 /dev/stdin
+//   go run qrss.go [flags] [words] | paplay --rate=44100 --channels=1 --format=s16le --raw /dev/stdin
 //
 // Flags:
 //   --mode=cw     (or any other mode defined in Modes below)
@@ -29,9 +29,10 @@ import (
 var MODE = flag.String("mode", "", "Which mode to use.")
 var LOOP = flag.Int64("loop", 0, "Repeat using this many seconds.  If 0, do not repeat.  Synchronizes to UNIX time modulo this many seconds.")
 var LOOP_OFFSET = flag.Int64("loop_offset", 0, "Offset seconds within the loop.")
+var DURATION = flag.Float64("duration", 0, "Specify total Duration (in seconds) instead of --dit time.")
 
 type ModeSpec struct {
-	Func    func(text string, flusher func()) Emitter
+	Func    func(text string) Emitter
 	Explain string
 }
 
@@ -51,7 +52,7 @@ var Modes = map[string]ModeSpec{
 	"demo-junk":  ModeSpec{mainDemoJunk, "demo of cron & async"},
 }
 
-func mainCW(text string, flusher func()) Emitter {
+func mainCW(text string) Emitter {
 	o := &CWConf{
 		ToneWhenOff: false,
 		Dit:         Secs(*DIT),
@@ -63,7 +64,7 @@ func mainCW(text string, flusher func()) Emitter {
 	return NewCWEmitter(o)
 }
 
-func mainFSCW(text string, flusher func()) Emitter {
+func mainFSCW(text string) Emitter {
 	o := &CWConf{
 		ToneWhenOff: true,
 		Dit:         Secs(*DIT),
@@ -75,7 +76,7 @@ func mainFSCW(text string, flusher func()) Emitter {
 	return NewCWEmitter(o)
 }
 
-func mainDFCW(text string, flusher func()) Emitter {
+func mainDFCW(text string) Emitter {
 	o := &DFConf{
 		ToneWhenOff: false,
 		Dit:         Secs(*DIT),
@@ -87,7 +88,7 @@ func mainDFCW(text string, flusher func()) Emitter {
 	return NewDFEmitter(o)
 }
 
-func mainTFCW(text string, flusher func()) Emitter {
+func mainTFCW(text string) Emitter {
 	o := &DFConf{
 		ToneWhenOff: true,
 		Dit:         Secs(*DIT),
@@ -99,7 +100,7 @@ func mainTFCW(text string, flusher func()) Emitter {
 	return NewDFEmitter(o)
 }
 
-func mainHell(text string, flusher func()) Emitter {
+func mainHell(text string) Emitter {
 	o := &HellConf{
 		Dit:       Secs(*DIT),
 		Freq:      0,
@@ -110,7 +111,7 @@ func mainHell(text string, flusher func()) Emitter {
 	return NewHellEmitter(o)
 }
 
-func mainParallelCW(text string, flusher func()) Emitter {
+func mainParallelCW(text string) Emitter {
 	texts := strings.Split(strings.TrimSpace(text), ";")
 	n := len(texts)
 	delta := *BW / float64(n-1) // Difference between neighboring CW frequenices, in Hertz.
@@ -128,8 +129,8 @@ func mainParallelCW(text string, flusher func()) Emitter {
 	return &Mixer{Gain: 1 / float64(len(inputs)), Inputs: inputs}
 }
 
-func mainDemoClock(text string, flusher func()) Emitter {
-	sum := NewAsyncMixer(flusher)
+func mainDemoClock(text string) Emitter {
+	sum := NewAsyncMixer()
 
 	p1 := &Cron{
 		ModuloSeconds:    10,
@@ -167,8 +168,8 @@ func mainDemoClock(text string, flusher func()) Emitter {
 
 }
 
-func mainDemoJunk(text string, flusher func()) Emitter {
-	sum := NewAsyncMixer(flusher)
+func mainDemoJunk(text string) Emitter {
+	sum := NewAsyncMixer()
 	p1 := &Cron{
 		ModuloSeconds:    20,
 		RemainderSeconds: 0,
@@ -223,6 +224,9 @@ func mainDemoJunk(text string, flusher func()) Emitter {
 
 func main() {
 	flag.Parse()
+	log.SetFlags(log.Ltime | log.Lmicroseconds)
+	log.SetPrefix("#")
+
 	m, ok := Modes[*MODE]
 	if !ok {
 		for k, v := range Modes {
@@ -230,22 +234,26 @@ func main() {
 		}
 		log.Fatalf("Unknown --mode requested: %q", *MODE)
 	}
+
 	text := strings.Join(flag.Args(), " ")
 	w := bufio.NewWriter(os.Stdout)
-	flusher := func() { w.Flush() }
 
-	if *LOOP > 0 {
-		sum := NewAsyncMixer(flusher)
+	em := m.Func(text)
+	if *DURATION > 0 {
+		AdjustDuration(em, SecondsToDuration(*DURATION))
+	}
+	if *LOOP > 0 && !*JUST_PRINT {
+		sum := NewAsyncMixer()
 		cron := &Cron{
 			ModuloSeconds:    *LOOP,
 			RemainderSeconds: *LOOP_OFFSET,
 			Run: func() {
-				sum.Add(m.Func(text, flusher))
+				sum.Add(em)
 			}}
 		cron.Start()
 		Play(sum, w) // Runs forever.
 	} else {
-		Play(m.Func(text, flusher), w)
+		Play(em, w)
 		w.Flush()
 	}
 }

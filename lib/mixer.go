@@ -21,6 +21,9 @@ func (o *Mixer) Duration() time.Duration {
 	}
 	return z
 }
+func (o *Mixer) DitPtr() *time.Duration {
+	return nil
+}
 
 func (o *Mixer) String() string {
 	var bb bytes.Buffer

@@ -14,6 +14,10 @@ func (o *Slice) Duration() time.Duration {
 	return time.Duration(seconds) * time.Second
 }
 
+func (o *Slice) DitPtr() *time.Duration {
+	return nil
+}
+
 func (o *Slice) String() string {
 	return fmt.Sprintf("Slice{%v}", o.Slice)
 }

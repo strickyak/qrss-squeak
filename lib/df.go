@@ -17,7 +17,6 @@ type DFConf struct {
 }
 type DFEmitter struct {
 	DFConf
-	Total time.Duration
 }
 
 func NewDFEmitter(conf *DFConf) *DFEmitter {
@@ -28,7 +27,6 @@ func NewDFEmitter(conf *DFConf) *DFEmitter {
 	if len(o.Morse) == 0 {
 		o.Morse = Morse(o.Text, o.Tail)
 	}
-	o.Total = time.Duration(o.DurationInDits()) * o.Dit
 	return o
 }
 
@@ -37,18 +35,22 @@ func (o *DFEmitter) DurationInDits() float64 {
 }
 
 func (o *DFEmitter) Duration() time.Duration {
-	return o.Total
+	return time.Duration(o.DurationInDits()) * o.Dit
+}
+
+func (o *DFEmitter) DitPtr() *time.Duration {
+	return &o.Dit
 }
 
 func (o *DFEmitter) String() string {
 	if o.ToneWhenOff {
 		return fmt.Sprintf(
 			"DFEmitter{ToneWhenOff,text=%q,morse=%q,freq=%.1f,width=%.1f,dit=%v,total=%v}",
-			o.Text, o.Morse, o.Freq, o.Bandwidth, o.Dit, o.Total)
+			o.Text, o.Morse, o.Freq, o.Bandwidth, o.Dit, o.Duration())
 	} else {
 		return fmt.Sprintf(
 			"DFEmitter{text=%q,morse=%q,freq=%.1f,width=%.1f,dit=%v,total=%v}",
-			o.Text, o.Morse, o.Freq, o.Bandwidth, o.Dit, o.Total)
+			o.Text, o.Morse, o.Freq, o.Bandwidth, o.Dit, o.Duration())
 	}
 }
 

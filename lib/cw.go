@@ -18,7 +18,6 @@ type CWConf struct {
 }
 type CWEmitter struct {
 	CWConf
-	Total time.Duration
 }
 
 func NewCWEmitter(conf *CWConf) *CWEmitter {
@@ -29,7 +28,6 @@ func NewCWEmitter(conf *CWConf) *CWEmitter {
 	if len(o.Morse) == 0 {
 		o.Morse = Morse(o.Text, o.Tail)
 	}
-	o.Total = time.Duration(o.DurationInDits()) * o.Dit
 	return o
 }
 
@@ -60,14 +58,18 @@ func (o *CWEmitter) DurationInDits() float64 {
 }
 
 func (o *CWEmitter) Duration() time.Duration {
-	return o.Total
+	return time.Duration(o.DurationInDits()) * o.Dit
+}
+
+func (o *CWEmitter) DitPtr() *time.Duration {
+	return &o.Dit
 }
 
 func (o *CWEmitter) String() string {
 	if o.ToneWhenOff {
-		return fmt.Sprintf("CWEmitter{ToneWhenOff,text=%q,morse=%q,freq=%.1f,width=%.1f,dit=%v,total=%v}", o.Text, o.Morse, o.Freq, o.Bandwidth, o.Dit, o.Total)
+		return fmt.Sprintf("CWEmitter{ToneWhenOff,text=%q,morse=%q,freq=%.1f,width=%.1f,dit=%v,total=%v}", o.Text, o.Morse, o.Freq, o.Bandwidth, o.Dit, o.Duration())
 	} else {
-		return fmt.Sprintf("CWEmitter{text=%q,morse=%q,freq=%.1f,dit=%v,total=%v}", o.Text, o.Morse, o.Freq, o.Dit, o.Total)
+		return fmt.Sprintf("CWEmitter{text=%q,morse=%q,freq=%.1f,dit=%v,total=%v}", o.Text, o.Morse, o.Freq, o.Dit, o.Duration())
 	}
 }
 

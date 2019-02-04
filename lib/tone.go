@@ -21,11 +21,8 @@ func PlayTone(toneBegin, toneEnd float64, ramp RampType, duration time.Duration,
 
 	// Determine number of ticks and lenghts of ramps up & down.
 	numTicks := *RATE * duration.Seconds()
-	rampTicks := *RATE * *RAMP
-	if rampTicks*2 > numTicks {
-		// Ramp faster when tone is too short for usual ramp.
-		rampTicks = numTicks / 2
-	}
+	// TODO: BUG: We document --ramp as portion of dit time, but here it is actually portion of this tone duration.
+	rampTicks := numTicks * *RAMP
 
 	// Output (to channel volts) one Volt (sound amplitude) per tick.
 	for t := 0; t < int(numTicks); t++ {

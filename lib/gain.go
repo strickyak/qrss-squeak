@@ -17,6 +17,10 @@ func (o *Gain) Duration() time.Duration {
 	return o.Input.Duration()
 }
 
+func (o *Gain) DitPtr() *time.Duration {
+	return o.Input.DitPtr()
+}
+
 func (o *Gain) String() string {
 	return fmt.Sprintf("Gain{%f, %v}", o.Gain, o.Input)
 }

@@ -17,15 +17,12 @@ type HellConf struct {
 }
 type HellEmitter struct {
 	HellConf
-
-	Total time.Duration
 }
 
 func NewHellEmitter(conf *HellConf) *HellEmitter {
 	o := &HellEmitter{
 		HellConf: *conf,
 	}
-	o.Total = o.Duration()
 	return o
 }
 
@@ -40,8 +37,12 @@ func (o *HellEmitter) Duration() time.Duration {
 	return dur
 }
 
+func (o *HellEmitter) DitPtr() *time.Duration {
+	return &o.Dit
+}
+
 func (o *HellEmitter) String() string {
-	return fmt.Sprintf("HellEmitter{text=%q,freq=%.1f,width=%.1f,dit=%v,total=%v}", o.Text, o.Freq, o.Bandwidth, o.Dit, o.Total)
+	return fmt.Sprintf("HellEmitter{text=%q,freq=%.1f,width=%.1f,dit=%v,total=%v}", o.Text, o.Freq, o.Bandwidth, o.Dit, o.Duration())
 }
 
 func boolSliceToDiDahSlice(bools []bool) DiDahSlice {

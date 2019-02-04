@@ -18,20 +18,15 @@ var TX_OFF = flag.String("tx_off", "", "Shell command to run to turn transmitter
 // The AsyncMixer will pause writing voltages to its output channel
 // while there are no inputs, so this should be the final thing
 // before Output().   AsyncMixer is an infinite Emitter,
-// but may have long (or infinite) pauses.  The flusher input
-// is a function that gets called when the AsyncMixer pauses.
-// It should flush pending output so it is not held in buffers
-// during pauses.
+// but may have long (or infinite) pauses.
 type AsyncMixer struct {
 	channels []chan Volt
 	adding   chan chan Volt
-	flusher  func()
 }
 
-func NewAsyncMixer(flusher func()) *AsyncMixer {
+func NewAsyncMixer() *AsyncMixer {
 	return &AsyncMixer{
-		adding:  make(chan chan Volt, small),
-		flusher: flusher,
+		adding: make(chan chan Volt, small),
 	}
 }
 
@@ -65,6 +60,10 @@ func (o *AsyncMixer) Duration() time.Duration {
 	return InfiniteDuration // Never stops -- but may have many long gaps.
 }
 
+func (o *AsyncMixer) DitPtr() *time.Duration {
+	return nil
+}
+
 func (o *AsyncMixer) String() string {
 	return "AsyncMixer{}"
 }
@@ -92,7 +91,6 @@ func (o *AsyncMixer) Emit(out chan Volt) {
 				// Don't block.
 			}
 		} else {
-			o.flusher() // Flush before blocking!
 			Transmit(false)
 			log.Printf("AsyncMixer blocking.")
 			e, ok := <-o.adding // Block.

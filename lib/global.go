@@ -9,7 +9,7 @@ import (
 var DIT = flag.Float64("dit", 0.1, "duration per dit, in seconds")
 var RATE = flag.Float64("rate", 44100, "samples per second to output, and for all internal Emitters to send.")
 var GAIN = flag.Float64("gain", 1.0, "global audio gain")
-var RAMP = flag.Float64("ramp", 0.01, "duration per ramp up or ramp down, in seconds")
+var RAMP = flag.Float64("ramp", 0.05, "portion of dit time for ramp up or ramp down")
 var FREQ = flag.Float64("freq", 1000, "global frequency offset")
 var BW = flag.Float64("bw", 10, "bandwidth to use, in Hertz")
 var CLIP = flag.Bool("clip", false, "clip silently (instead of panicking)")
@@ -35,11 +35,14 @@ func (o DiDahSlice) String() string {
 // The generator for each mode (cw, dt, etc.) is an Emitter.
 type Emitter interface {
 	// Send the audio signal as a sequence of Volt on the given channel.
-	// Don't close the channel; that's the caller's responsibility.
+	// Don't close the channel inside Emit(); that's the caller's responsibility.
 	Emit(chan Volt)
 	// Return the duration of the signal, if it were to be emitted.
 	// The number of samples in the signal divided by *RATE should give the Duration.
 	Duration() time.Duration
+	// A pointer to a Duration that can be adjusted
+	// linearly to change the Duration.
+	DitPtr() *time.Duration
 	// Debug string describing the Emitter.
 	String() string
 }
@@ -51,7 +54,7 @@ var InfiniteDuration = 100 * 366 * 24 * time.Hour
 // RampType describes an envelope to shape the output sine waves
 // so they don't have sharp beginning and ends.
 // We can apply a "Raised Cosine" shape to the beginning or the end or both.
-// The global flag --ramp specifies the duration of the ramp up or ramp down.
+// The global flag --ramp specifies the portion of dit time for the ramp up or ramp down.
 // TODO: Be able to glue together signals so the phase is consistent from one to the next.
 type RampType int
 
