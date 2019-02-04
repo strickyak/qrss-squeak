@@ -130,7 +130,7 @@ time is a divisor of 3600, it will repeat at the same times within every
 full hour, starting at the full hour.  You can add an offset to that,
 so it starts N seconds after the full minute or hour by specifying
 `-loop_offset=N`.  For instance, to transmit at the 5 and 35 second
-mark within every full minute, use `-loop_offset=5`.
+mark within every full minute, use `-loop=30 -loop_offset=5`.
 
 (Technically, we take the "UNIX time" in seconds modulo the `-loop`
 value, and if that equals the `-loop_offset` value, the transmission will
@@ -146,8 +146,10 @@ of the loop time can get messed up.
 If your transmitter can be controlled by CAT commands,
 two flags might can be used in Loop mode to turn your transmitter on and off
 at the right times to give it a chance to cool down between transmissions:
-*   `--tx_on='rigctl --flags... T 1'
-*   `--tx_off='sleep 3; rigctl --flags... T 0'
+
+*   `--tx_on='rigctl --flags... T 1'`
+*   `--tx_off='sleep 3; rigctl --flags... T 0'`
+
 You'll have to look up what rigctl options your need for your transmitter.
 The `sleep 3` is needed because the audio has not been flushed and finished
 playing yet when this command is issued.
@@ -157,7 +159,7 @@ playing yet when this command is issued.
 ### cw: Continuous Wave Morse Code.
 
 Using `-mode=cw` will produce ordinary Continuous Wave Morse Code.
-It's rate is determined by the -dit flag, specifying the duration of
+Its rate is determined by the -dit flag, specifying the duration of
 one dit in seconds.  Divide 1.2 by the desired words per minute to
 get the dit time.
 
