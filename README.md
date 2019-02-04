@@ -8,25 +8,34 @@ These examples have short dit times for demo; in QRSS you want to slow that down
 
 ### Quick Examples
 
+(These examples work for me on an Ubuntu- or Debian-type Linux.
+It seems other platforms including Raspberry Pis, Macs, and Windows machines
+should be able to work as well, if you can figure out what the substitute
+for the paplay command is.)
+
 Divide 1.2 by the desired words-per-minute to get the "dit" time in seconds.
 
 1.2 / 12 = 0.1, so for 12 WPM use -dit=0.1:
 
 ```
+DEVICE=default
 go run qrss.go -mode=cw -dit=0.1 vvv de q1rss/b |
-  paplay --rate=44100 --channels=1 --format=s16le --raw /dev/stdin
+  paplay --rate=44100 --channels=1 --format=s16le --raw --device=$DEVICE /dev/stdin
 ```
+Substitute your own $DEVICE name.  Use "pactl list" and look for Sinks for help.
+It might be "default" or something like "alsa_output.pci-0000_00_1f.3.analog-stereo"
+or even something twice as long.
 
 Repeating that every 20 seconds, at 0, 20, and 40 seconds after the full minute:
 ```
 go run qrss.go -loop=20 --mode=cw --dit=0.1 vvv de q1rss/b |
-  paplay --rate=44100 --channels=1 --format=s16le --raw /dev/stdin
+  paplay --rate=44100 --channels=1 --format=s16le --raw --device=$DEVICE /dev/stdin
 ```
 
 Repeating that every 20 seconds, at 5, 25, and 45 seconds after the full minute:
 ```
 go run qrss.go loop_ofset=5 -loop=20 --mode=cw --dit=0.1 vvv de q1rss/b |
-  paplay --rate=44100 --channels=1 --format=s16le --raw /dev/stdin
+  paplay --rate=44100 --channels=1 --format=s16le --raw --device=$DEVICE /dev/stdin
 ```
 
 ### Example with Dual Frequency:
@@ -34,7 +43,7 @@ This uses 100Hz of bandwidth so you can hear the different tones if you
 listen to it.  You can tighten the bandwith like to 5hz ( -bw=5 ) for QRSS.
 ```
 go run qrss.go -mode=df -bw=100 -dit=0.3 vvv de q1rss/b |
-  paplay --rate=44100 --channels=1 --format=s16le --raw /dev/stdin
+  paplay --rate=44100 --channels=1 --format=s16le --raw --device=$DEVICE /dev/stdin
 ```
 
 ### Debug Info
@@ -123,6 +132,15 @@ The loop duration should be longer than the transmision duration
 plus the overhead of the paplay latency, the operating system's sound device
 buffering, and the unix pipe buffering.  If not, the synchronization
 of the loop time can get messed up.
+
+If your transmitter can be controlled by CAT commands,
+two flags might can be used in Loop mode to turn your transmitter on and off
+at the right times to give it a chance to cool down between transmissions:
+*   `--tx_on='rigctl --flags... T 1'
+*   `--tx_off='sleep 3; rigctl --flags... T 0'
+You'll have to look up what rigctl options your need for your transmitter.
+The `sleep 3` is needed because the audio has not been flushed and finished
+playing yet when this command is issued.
 
 ## Modes
 
