@@ -15,15 +15,15 @@ for the paplay command is.)
 
 Divide 1.2 by the desired words-per-minute to get the "dit" time in seconds.
 
-1.2 / 12 = 0.1, so for 12 WPM use -dit=0.1:
+1.2 / 12 = 0.1, so for 12 WPM use `-dit=0.1`:
 
 ```
 DEVICE=default
 go run qrss.go -mode=cw -dit=0.1 vvv de q1rss/b |
   paplay --rate=44100 --channels=1 --format=s16le --raw --device=$DEVICE /dev/stdin
 ```
-Substitute your own $DEVICE name.  Use "pactl list" and look for Sinks for help.
-It might be "default" or something like "alsa_output.pci-0000_00_1f.3.analog-stereo"
+Substitute your own $DEVICE name.  Use `pactl list` and look for Sinks for help.
+It might be `default` or something like `alsa_output.pci-0000_00_1f.3.analog-stereo`
 or even something twice as long.
 
 Repeating that every 20 seconds, at 0, 20, and 40 seconds after the full minute:
@@ -40,7 +40,7 @@ go run qrss.go loop_ofset=5 -loop=20 --mode=cw --dit=0.1 vvv de q1rss/b |
 
 ### Example with Dual Frequency:
 This uses 100Hz of bandwidth so you can hear the different tones if you
-listen to it.  You can tighten the bandwith like to 5hz ( -bw=5 ) for QRSS.
+listen to it.  You can tighten the bandwith like to 5hz ( `-bw=5` ) for QRSS.
 ```
 go run qrss.go -mode=df -bw=100 -dit=0.3 vvv de q1rss/b |
   paplay --rate=44100 --channels=1 --format=s16le --raw --device=$DEVICE /dev/stdin
@@ -49,7 +49,7 @@ go run qrss.go -mode=df -bw=100 -dit=0.3 vvv de q1rss/b |
 ### Debug Info
 
 Add `-x` to dump debug info and exit.  You can use this to get the duration of the signal.
-In this eamples, it prints that it will last 17.7 seconds.
+In this example, it prints that it will last 17.7 seconds.
 
 ```
 $ go run qrss.go -mode=df -bw=10 -dit=0.3 -x  vvv de q1rss/b
@@ -76,16 +76,16 @@ go run qrss.go  -flags...  words...
 ```
 
 The words are the text to transmit.  Multiple words are joined with spaces.
-It may be just one call sign like "Q1RSS" or multiple words like "VVV DE Q1RSS/B".
+It may be just one call sign like `Q1RSS` or multiple words like `VVV DE Q1RSS/B`.
 
-The flags are written like "--mode=cw" or "-dit=30".  You may use either one or two
+The flags are written like `--mode=cw` or `-dit=30`.  You may use either one or two
 dashes at the front; it does not matter.  Any non-boolean flags require an argument,
-usually using "=" to connect the value.  All flags have some default.  You can see
+usually using `=` to connect the value.  All flags have some default.  You can see
 a list of all flags and their defaults by invoking the command with a bogus flag, like
 ```
 go run qrss.go -help
 ```
-For more details about the flag parse, try "godoc flag | less".
+For more details about the flag parse, try `godoc flag | less`.
 
 ### Audio on Standard Output
 
@@ -93,24 +93,24 @@ The program outputs 16-bit mono-channel samples in little-endian format (the lea
 byte comes first).  The output is "raw" in the sense there is no header at the front.
 This is commonly called "PCM" format, even though it has nothing at all to do with
 pulse-coded modulation.  These can be consumed by the Pulse Audio player command
-"paplay" with flags --channels=1 (it's monophonic, not stereo), --format=s16le
-(the samples are 16-bit little-endian), and --raw (there is no header).
+`paplay` with flags `--channels=1` (it's monophonic, not stereo), `--format=s16le`
+(the samples are 16-bit little-endian), and `--raw` (there is no header).
 
-The flag --rate can be used to set the number of samples per second.
-The default is --rate=44100 which is the best rate for many sound cards.
-The "paplay" command also takes a --rate argument.
+The flag `--rate` can be used to set the number of samples per second.
+The default is `--rate=44100` which is the best rate for many sound cards.
+The `paplay` command also takes a `--rate` flag.
 
 ### Frequency and Bandwidth
 
-The flag --freq sets the "base frequency" (in Hz) for the sounds being played.
+The flag `--freq` sets the "base frequency" (in Hz) for the sounds being played.
 By default this is 1000, so you can set your Upper Sideband transmitter dial
 frequency 1000 Hz lower than you want the transmission to be located.
 
-The flag --bw sets the bandwidth range of the output tones.  For instance, if you're
-transmitting Dual Frequency CW, and you specify "-mode=df -freq=1500 -bw=8",
+The flag `--bw` sets the bandwidth range of the output tones.  For instance, if you're
+transmitting Dual Frequency CW, and you specify `-mode=df -freq=1500 -bw=8`,
 then the program will output tones at 1500 and 1508 Hz.  The simple CW mode
-(-mode=cw) only uses tones at the base frequency (1500 Hz) and ignores the -bw value.
-(The value specified with --bw just specifies the maximum range of tones we try
+( `-mode=cw` ) only uses tones at the base frequency (1500 Hz) and ignores the `-bw` value.
+(The value specified with `-bw` just specifies the maximum range of tones we try
 to produce, but your actuall on-the-air bandwidth will always be greater
 because all changing transmissions produce some extra sideband splatter.)
 
@@ -118,9 +118,9 @@ because all changing transmissions produce some extra sideband splatter.)
 
 The program can either output the words once ("one shot mode") or repeat that
 every so many seconds ("looping mode").  For one shot mode, do not specify
-the -loop flag.
+the `-loop` flag.
 
-For looping mode, use -loop to specify how long the loop is in seconds.
+For looping mode, use `-loop` to specify how long the loop is in seconds.
 For example, to repeat every 20 seconds, specify `-loop=20`,
 or to repeat every 5 minutes, specify `-loop=300`.
 
@@ -156,6 +156,15 @@ playing yet when this command is issued.
 
 ## Modes
 
+All the following modes support the `--dit` flag to specify the
+duration of the smallest element in the mode.
+
+But they also support the `--duration` flag to specify the total
+duration of the entire transmission.   For instance, if you want
+the transmission to take exactly 10 minutes, specify `--duration=600`,
+and don't specify the `--dit` flag.  The dit duration will be
+calculated for your.
+
 ### cw: Continuous Wave Morse Code.
 
 Using `-mode=cw` will produce ordinary Continuous Wave Morse Code.
@@ -169,20 +178,23 @@ Using `-mode=fs` will produce two-tone frequency-shift encoded Morse Code.
 The higher tone (at --freq value plus --bw value) represents "mark" state,
 and looks just like CW morse code.  The lower tone (at --freq value)
 is the "space" state, and is transmitted during the gaps in the morse code.
-Use --bw to specify the difference between those frequencies.
+Use `--bw` to specify the difference between those frequencies.
+Use `--dit` to speicfy the dit duration.
 
 ### df: Dual Frequency Morse Code.
 
 Using `-mode=dt` will produce Morse Code in which the dahs are the same
 duration as the dits, but dahs are at the higher frequency and dits are
 at the base frequency.
-Use --bw to specify the difference between those frequencies.
+Use `--bw` to specify the difference between those frequencies.
+Use `--dit` to speicfy the dit duration.
 
 ### tf: Triple Frequency Morse Code.
 
 Using `-mode=tf` gives you a varient of Dual Freuquency in which the
 gaps between letters or words is filled with a third frequency midway
 between the other two.
+Use `--dit` to speicfy the dit duration.
 
 ### hell: Human-Readable Hellschreiber
 
@@ -196,6 +208,7 @@ get better fonts sometime.)
 Use `-bw` to specify the maximum distance of the 8 tones produced.
 For instance, if `-bw=21`, the tones will be 0, 3, 6, 9,12, 15, 18,
 and 21 Hz offset from the base -freq value.
+Use `--dit` to speicfy one pixel duration.
 
 ## Internal Go Documentation
 
