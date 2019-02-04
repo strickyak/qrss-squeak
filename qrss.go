@@ -185,7 +185,7 @@ func mainDemoFour(text string) Emitter {
 				Tail:        true,
 			})
 			AdjustDuration(cw, 150*time.Second)
-			sum.Add(&Gain{0.25, cw})
+			sum.Add(&Gain{0.99, cw})
 		}}
 	p1.Start()
 
@@ -202,7 +202,7 @@ func mainDemoFour(text string) Emitter {
 				Tail:        true,
 			})
 			AdjustDuration(df, 150*time.Second)
-			sum.Add(&Gain{0.25, df})
+			sum.Add(&Gain{0.99, df})
 		}}
 	p2.Start()
 
@@ -219,7 +219,7 @@ func mainDemoFour(text string) Emitter {
 				Tail:        true,
 			})
 			AdjustDuration(fs, 150*time.Second)
-			sum.Add(&Gain{0.25, fs})
+			sum.Add(&Gain{0.99, fs})
 		}}
 	p3.Start()
 
@@ -235,7 +235,7 @@ func mainDemoFour(text string) Emitter {
 				Tail:      true,
 			})
 			AdjustDuration(hell, 150*time.Second)
-			sum.Add(&Gain{0.25, hell})
+			sum.Add(&Gain{0.99, hell})
 		}}
 	p4.Start()
 
