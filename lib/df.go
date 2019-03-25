@@ -60,7 +60,7 @@ func (o *DFEmitter) Emit(out chan Volt) {
 	f0 := (f1 + f2) / 2
 	gap := func() {
 		if o.ToneWhenOff {
-			PlayTone(f0, f0, BOTH, o.Dit, out)
+			PlayTone(f0, f0, BOTH, o.Dit, AutomaticRampDuration, out)
 		} else {
 			PlayGap(o.Dit, out)
 		}
@@ -69,9 +69,9 @@ func (o *DFEmitter) Emit(out chan Volt) {
 	for _, didah := range o.Morse {
 		switch didah {
 		case '.':
-			PlayTone(f1, f1, BOTH, o.Dit, out)
+			PlayTone(f1, f1, BOTH, o.Dit, AutomaticRampDuration, out)
 		case '-':
-			PlayTone(f2, f2, BOTH, o.Dit, out)
+			PlayTone(f2, f2, BOTH, o.Dit, AutomaticRampDuration, out)
 		case ' ':
 			gap()
 		default:

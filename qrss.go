@@ -24,12 +24,14 @@ import (
 	"time"
 
 	. "github.com/strickyak/qrss-squeak/lib"
+	"github.com/strickyak/qrss-squeak/marimba"
 )
 
 var MODE = flag.String("mode", "", "Which mode to use.")
 var LOOP = flag.Int64("loop", 0, "Repeat using this many seconds.  If 0, do not repeat.  Synchronizes to UNIX time modulo this many seconds.")
 var LOOP_OFFSET = flag.Int64("loop_offset", 0, "Offset seconds within the loop.")
 var DURATION = flag.Float64("duration", 0, "Specify total Duration (in seconds) instead of --dit time.")
+var IMAGE = flag.String("image", "", "Image for marimba mode")
 
 type ModeSpec struct {
 	Func    func(text string) Emitter
@@ -38,11 +40,12 @@ type ModeSpec struct {
 
 var Modes = map[string]ModeSpec{
 	// Usual modes:
-	"cw":   ModeSpec{mainCW, "normal CW (single tone)"},
-	"fs":   ModeSpec{mainFSCW, "Frequency Shift CW (low tone for gaps)"},
-	"df":   ModeSpec{mainDFCW, "Dual Frequency CW (high tone for dahs)"},
-	"tf":   ModeSpec{mainTFCW, "Three Frequency CW (mid-tone for OFF state)"},
-	"hell": ModeSpec{mainHell, "Hellschreiber: print human-readable ASCII directly in spectrum"},
+	"cw":      ModeSpec{mainCW, "normal CW (single tone)"},
+	"fs":      ModeSpec{mainFSCW, "Frequency Shift CW (low tone for gaps)"},
+	"df":      ModeSpec{mainDFCW, "Dual Frequency CW (high tone for dahs)"},
+	"tf":      ModeSpec{mainTFCW, "Three Frequency CW (mid-tone for OFF state)"},
+	"hell":    ModeSpec{mainHell, "Hellschreiber: print human-readable ASCII directly in spectrum"},
+	"marimba": ModeSpec{mainMarimba, "draw bitmap in spectrum with many tiny oscillators"},
 
 	// Weird modes:
 	"par": ModeSpec{mainParallelCW, "CW letters in parallel (polyphonic)"},
@@ -110,6 +113,17 @@ func mainHell(text string) Emitter {
 		Tail:      true,
 	}
 	return NewHellEmitter(o)
+}
+
+func mainMarimba(text string) Emitter {
+	o := &marimba.Conf{
+		Dit:       Secs(*DIT),
+		Freq:      0,
+		Bandwidth: *BW,
+		Filename:  *IMAGE,
+		Gain:      0.25,
+	}
+	return NewAGC(marimba.NewEmitter(o))
 }
 
 func mainParallelCW(text string) Emitter {

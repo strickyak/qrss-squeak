@@ -5,6 +5,8 @@ import (
 	"time"
 )
 
+const AutomaticRampDuration = 0
+
 func PlayGap(duration time.Duration, volts chan Volt) {
 	numTicks := *RATE * duration.Seconds()
 	for t := 0; t < int(numTicks); t++ {
@@ -13,16 +15,21 @@ func PlayGap(duration time.Duration, volts chan Volt) {
 }
 
 // Boop writes voltages in range [-1.0, +1.0] to the channel volts.
-//
-func PlayTone(toneBegin, toneEnd float64, ramp RampType, duration time.Duration, volts chan Volt) {
+
+func PlayTone(toneBegin, toneEnd float64, ramp RampType, duration time.Duration, rampDuration time.Duration, volts chan Volt) {
 	// Add global frequency base to tones to get absolute Hz.
 	hz1 := *FREQ + toneBegin
 	hz2 := *FREQ + toneEnd
 
 	// Determine number of ticks and lenghts of ramps up & down.
 	numTicks := *RATE * duration.Seconds()
+	var rampTicks float64
 	// TODO: BUG: We document --ramp as portion of dit time, but here it is actually portion of this tone duration.
-	rampTicks := numTicks * *RAMP
+	if rampDuration == AutomaticRampDuration {
+		rampTicks = numTicks * *RAMP
+	} else {
+		rampTicks = *RATE * rampDuration.Seconds()
+	}
 
 	// Output (to channel volts) one Volt (sound amplitude) per tick.
 	for t := 0; t < int(numTicks); t++ {

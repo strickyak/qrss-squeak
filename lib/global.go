@@ -82,3 +82,9 @@ func Secs(x float64) time.Duration {
 	nanos := (x * float64(time.Second))
 	return time.Duration(int64(nanos))
 }
+
+func Check(err error) {
+	if err != nil {
+		log.Fatalf("Check fails: %v", err)
+	}
+}

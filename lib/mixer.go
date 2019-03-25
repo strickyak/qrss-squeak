@@ -28,8 +28,8 @@ func (o *Mixer) DitPtr() *time.Duration {
 func (o *Mixer) String() string {
 	var bb bytes.Buffer
 	fmt.Fprintf(&bb, "Mixer{%f, ", o.Gain)
-	for _, e := range o.Inputs {
-		fmt.Fprintf(&bb, "%v, ", e)
+	for i, e := range o.Inputs {
+		fmt.Fprintf(&bb, "        [%d] (%10.3fs) %v,\n        ", i, e.Duration().Seconds(), e)
 	}
 	fmt.Fprintf(&bb, "}")
 	return bb.String()
