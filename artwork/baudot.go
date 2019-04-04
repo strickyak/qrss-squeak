@@ -26,7 +26,7 @@ const (
 var Message = []string{LTRS, W, FIGS, _6, LTRS, R, E, K, SP, C, M, FIGS, _9, _7}
 
 func Circ(x, y, r, w int) {
-	Printf("<circle cx='%d' cy='%d' r='%d' stroke='white' stroke-width='%d' fill='black' />\n", x, y, r, w)
+	Printf("<circle cx='%d' cy='%d' r='%d' stroke='white' stroke-width='%d' fill='white' />\n", x, y, r, w)
 }
 
 func main() {
@@ -36,13 +36,13 @@ func main() {
 	for i, code := range Message {
 		for j := 0; j < 6; j++ {
 			if code[j] == 'o' {
-				Circ(100*i+400, 100*j+75, 35, 10)
+				Circ(100*i+400, 100*j+75, 35, 1)
 			}
 		}
 	}
 
 	for k := 100; k < len(Message)*100+700; k += 100 {
-		Circ(k, 100*2+75, 20, 10)
+		Circ(k, 100*2+75, 20, 1)
 	}
 
 	Printf("<line x1='25' y1='2' x2='%d' y2='2' style='stroke:white;stroke-width:3' />\n", WIDTH-25)
