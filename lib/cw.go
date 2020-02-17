@@ -36,7 +36,7 @@ func (o *CWEmitter) DurationInDits() float64 {
 	var n float64
 	for _, didah := range o.Morse {
 		switch didah {
-		case '.', ' ':
+		case '.', ' ', '/':
 			if o.NoGap {
 				n += 1 // 1 for ON, 1 for OFF.
 			} else {
@@ -96,6 +96,8 @@ func (o *CWEmitter) Emit(out chan Volt) {
 			PlayTone(f1, f1, BOTH, o.Dit, o.Ramp, out)
 		case '-':
 			PlayTone(f1, f1, BOTH, 3*o.Dit, o.Ramp, out)
+		case '/':
+			PlayTone(f1, f1+o.Bandwidth, BOTH, o.Dit, o.Ramp, out)
 		case ' ':
 			gap()
 		default:

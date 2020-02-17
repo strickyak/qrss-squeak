@@ -48,7 +48,8 @@ var Modes = map[string]ModeSpec{
 	"marimba": ModeSpec{mainMarimba, "draw bitmap in spectrum with many tiny oscillators"},
 
 	// Weird modes:
-	"par": ModeSpec{mainParallelCW, "CW letters in parallel (polyphonic)"},
+	"par":    ModeSpec{mainParallelCW, "CW letters in parallel (polyphonic)"},
+	"decon5": ModeSpec{mainDecon5, "Five deconstructed lines of / and gap"},
 
 	// Not useful execpt as demos:
 	"demo-clock": ModeSpec{mainDemoClock, "demo of ticking clock"},
@@ -181,6 +182,33 @@ func mainDemoClock(text string) Emitter {
 
 	return sum
 
+}
+
+func mainDecon5(keying string) Emitter {
+	rows := strings.Split(keying, ",")
+	if len(rows) != 5 {
+		log.Fatalf("mainDecon5: expected 5 rows with commas in between: %s", keying)
+	}
+
+	sum := NewAsyncMixer()
+	for i, row := range rows {
+		p := &Cron{ // CW
+			ModuloSeconds:    25 * 60,            // 25-minute cycles.
+			RemainderSeconds: int64(i)*5*60 + 15, // 5 minutes per row.
+			Run: func() {
+				cw := NewCWEmitter(&CWConf{
+					ToneWhenOff: false,
+					Dit:         time.Duration(*DIT / 1000000000), // try 5 seconds.
+					Freq:        float64(i) * (*BW / 4),
+					Bandwidth:   (*BW / 5),
+					Morse:       []DiDah(row),
+					Tail:        false,
+				})
+				sum.Add(&Gain{0.99, cw})
+			}}
+		p.Start()
+	}
+	return sum
 }
 
 func mainDemoFour(text string) Emitter {
