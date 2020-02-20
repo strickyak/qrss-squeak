@@ -192,21 +192,24 @@ func mainDecon5(keying string) Emitter {
 
 	sum := NewAsyncMixer()
 	for i, row := range rows {
-		p := &Cron{ // CW
-			ModuloSeconds:    25 * 60,            // 25-minute cycles.
-			RemainderSeconds: int64(i)*5*60 + 15, // 5 minutes per row.
-			Run: func() {
-				cw := NewCWEmitter(&CWConf{
-					ToneWhenOff: false,
-					Dit:         time.Duration(*DIT / 1000000000), // try 5 seconds.
-					Freq:        float64(i) * (*BW / 4),
-					Bandwidth:   (*BW / 5),
-					Morse:       []DiDah(row),
-					Tail:        false,
-				})
-				sum.Add(&Gain{0.99, cw})
-			}}
-		p.Start()
+		func(_i int, _row string) { // Capture i as _i, row as _row
+			p := &Cron{ // CW
+				ModuloSeconds:    25 * 60,             // 25-minute cycles.
+				RemainderSeconds: int64(_i)*5*60 + 15, // 5 minutes per row.
+				Run: func() {
+					cw := NewCWEmitter(&CWConf{
+						ToneWhenOff: false,
+						Dit:         time.Duration(*DIT * 1000000000), // try 5 seconds.
+						Freq:        float64(_i) * (*BW / 5),
+						Bandwidth:   1, // TODO: (*BW / 8),
+						Morse:       []DiDah(_row),
+						Tail:        false,
+						NoGap:       true,
+					})
+					sum.Add(&Gain{0.99, cw})
+				}}
+			p.Start()
+		}(i, row)
 	}
 	return sum
 }
