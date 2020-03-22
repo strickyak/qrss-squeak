@@ -48,8 +48,9 @@ var Modes = map[string]ModeSpec{
 	"marimba": ModeSpec{mainMarimba, "draw bitmap in spectrum with many tiny oscillators"},
 
 	// Weird modes:
-	"par":    ModeSpec{mainParallelCW, "CW letters in parallel (polyphonic)"},
-	"decon5": ModeSpec{mainDecon5, "Five deconstructed lines of / and gap"},
+	"par":     ModeSpec{mainParallelCW, "CW letters in parallel (polyphonic)"},
+	"decon5":  ModeSpec{mainDecon5, "Five deconstructed lines of / and gap"},
+	"fractal": ModeSpec{mainFractal, "4-level fractal Dual Tone"},
 
 	// Not useful execpt as demos:
 	"demo-clock": ModeSpec{mainDemoClock, "demo of ticking clock"},
@@ -182,6 +183,52 @@ func mainDemoClock(text string) Emitter {
 
 	return sum
 
+}
+
+func mainFractal(_ string) Emitter {
+	// Hardwire 12-element pattern here.
+	pattern := []DiDah(" .-. . -.-  ") // (W6)REK
+	mix := NewAsyncMixer()
+	dit, _ := time.ParseDuration("694444444ns") // 100/144 seconds.
+
+	// Total 14400-second daily transmisison.
+	f := 0.0
+	for ia, _ := range pattern { // 1200-second loop
+		if pattern[ia] != ' ' {
+			fa := f
+			if pattern[ia] == '-' {
+				fa = f + 20
+			}
+			for ib, _ := range pattern { // 100-second loop
+				if pattern[ib] != ' ' {
+					fb := fa
+					if pattern[ib] == '-' {
+						fb = fa + 10
+					}
+
+					func(_ia, _ib int) { // Capture loop vars
+						p := &Cron{ // CW
+							ModuloSeconds:    24 * 60 * 60, // diurnal.
+							RemainderSeconds: 3600 + 1200*int64(_ia) + 100*int64(_ib),
+							Run: func() {
+								fractal := NewFractalEmitter(&FractalConf{
+									ToneWhenOff: false,
+									Dit:         dit,
+									Freq:        fb,
+									Bandwidth:   10,
+									Morse:       pattern,
+									Tail:        false,
+								})
+								mix.Add(&Gain{0.99, fractal})
+							}}
+						p.Start()
+					}(ia, ib)
+
+				}
+			}
+		}
+	}
+	return mix
 }
 
 func mainDecon5(keying string) Emitter {
