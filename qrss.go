@@ -222,8 +222,11 @@ func mainFractal(_ string) Emitter {
 
 					func(_ia, _ib int) { // Capture loop vars
 						p := &Cron{ // CW
-							ModuloSeconds:    24 * 60 * 60, // diurnal.
-							RemainderSeconds: 3600 + 1200*int64(_ia) + 100*int64(_ib),
+							//ModuloSeconds:    24 * 60 * 60, // diurnal.
+							ModuloSeconds: 4 * 60 * 60, // second-life diurnal (i.e. every 4 hrs).
+							// RemainderSeconds: 8*3600 + 1200*int64(_ia) + 100*int64(_ib),  // 8am Zulu
+							RemainderSeconds: 1200*int64(_ia) + 100*int64(_ib),
+
 							Run: func() {
 								fractal := NewFractalEmitter(&FractalConf{
 									ToneWhenOff: false,
