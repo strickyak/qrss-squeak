@@ -6,6 +6,7 @@ import (
 	"time"
 )
 
+var WPM = flag.Float64("wpm", 0.0, "alternate to DIT for plain cw")
 var DIT = flag.Float64("dit", 0.1, "duration per dit, in seconds")
 var RATE = flag.Float64("rate", 44100, "samples per second to output, and for all internal Emitters to send.")
 var GAIN = flag.Float64("gain", 1.0, "global audio gain")

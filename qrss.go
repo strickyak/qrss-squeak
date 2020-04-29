@@ -60,9 +60,14 @@ var Modes = map[string]ModeSpec{
 }
 
 func mainCW(text string) Emitter {
+	dit := Secs(*DIT)
+	if *WPM != 0 {
+		//dit = Secs(*WPM * 0.1 / 12)
+		dit = Secs(1.2 / *WPM)
+	}
 	o := &CWConf{
 		ToneWhenOff: false,
-		Dit:         Secs(*DIT),
+		Dit:         dit,
 		Freq:        0,
 		Bandwidth:   0,
 		Text:        text,
@@ -222,8 +227,11 @@ func mainFractal(_ string) Emitter {
 
 					func(_ia, _ib int) { // Capture loop vars
 						p := &Cron{ // CW
-							ModuloSeconds:    24 * 60 * 60, // diurnal.
-							RemainderSeconds: 3600 + 1200*int64(_ia) + 100*int64(_ib),
+							//ModuloSeconds:    24 * 60 * 60, // diurnal.
+							ModuloSeconds: 4 * 60 * 60, // second-life diurnal (i.e. every 4 hrs).
+							// RemainderSeconds: 8*3600 + 1200*int64(_ia) + 100*int64(_ib),  // 8am Zulu
+							RemainderSeconds: 1200*int64(_ia) + 100*int64(_ib),
+
 							Run: func() {
 								fractal := NewFractalEmitter(&FractalConf{
 									ToneWhenOff: false,
