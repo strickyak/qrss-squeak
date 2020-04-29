@@ -40,12 +40,13 @@ type ModeSpec struct {
 
 var Modes = map[string]ModeSpec{
 	// Usual modes:
-	"cw":      ModeSpec{mainCW, "normal CW (single tone)"},
-	"fs":      ModeSpec{mainFSCW, "Frequency Shift CW (low tone for gaps)"},
-	"df":      ModeSpec{mainDFCW, "Dual Frequency CW (high tone for dahs)"},
-	"tf":      ModeSpec{mainTFCW, "Three Frequency CW (mid-tone for OFF state)"},
-	"hell":    ModeSpec{mainHell, "Hellschreiber: print human-readable ASCII directly in spectrum"},
-	"marimba": ModeSpec{mainMarimba, "draw bitmap in spectrum with many tiny oscillators"},
+	"cw":       ModeSpec{mainCW, "normal CW (single tone)"},
+	"fs":       ModeSpec{mainFSCW, "Frequency Shift CW (low tone for gaps)"},
+	"df":       ModeSpec{mainDFCW, "Dual Frequency CW (high tone for dahs)"},
+	"tf":       ModeSpec{mainTFCW, "Three Frequency CW (mid-tone for OFF state)"},
+	"hell":     ModeSpec{mainHell, "Hellschreiber: print human-readable ASCII directly in spectrum"},
+	"marimba":  ModeSpec{mainMarimba, "draw bitmap in spectrum with many tiny oscillators"},
+	"fishbone": ModeSpec{mainFishbone, "Fishbone-shaped Dual Frequency CW (high tone for dahs)"},
 
 	// Weird modes:
 	"par":     ModeSpec{mainParallelCW, "CW letters in parallel (polyphonic)"},
@@ -80,6 +81,19 @@ func mainFSCW(text string) Emitter {
 		Tail:        true,
 	}
 	return NewCWEmitter(o)
+}
+
+func mainFishbone(text string) Emitter {
+	o := &DFConf{
+		ToneWhenOff: false,
+		Dit:         Secs(*DIT),
+		Freq:        0,
+		Bandwidth:   *BW,
+		Text:        text,
+		Tail:        true,
+		Fishbone:    true,
+	}
+	return NewDFEmitter(o)
 }
 
 func mainDFCW(text string) Emitter {
@@ -239,22 +253,23 @@ func mainDecon5(keying string) Emitter {
 
 	sum := NewAsyncMixer()
 	for i, row := range rows {
-		func(_i int, _row string) { // Capture i as _i, row as _row
+		func(_i int, _row string) { // Capture i as _i, row as _row.
 			p := &Cron{ // CW
 				ModuloSeconds:    25 * 60,             // 25-minute cycles.
 				RemainderSeconds: int64(_i)*5*60 + 15, // 5 minutes per row.
 				Run: func() {
 					cw := NewCWEmitter(&CWConf{
 						ToneWhenOff: false,
-						Dit:         time.Duration(*DIT * 1000000000), // try 5 seconds.
+						Dit:         5 * time.Second, // try 5 seconds.
 						Freq:        float64(_i) * (*BW / 5),
-						Bandwidth:   1, // TODO: (*BW / 8),
+						Bandwidth:   (*BW / 8),
 						Morse:       []DiDah(_row),
 						Tail:        false,
 						NoGap:       true,
 					})
 					sum.Add(&Gain{0.99, cw})
-				}}
+				},
+			}
 			p.Start()
 		}(i, row)
 	}
