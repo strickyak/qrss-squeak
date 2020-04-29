@@ -1,12 +1,9 @@
 package lib
 
 import (
-	"flag"
 	"log"
 	"strings"
 )
-
-var speed = flag.Float64("wpm", 12.0, "Words Per Minute")
 
 var MorseCodeMap = map[rune][]DiDah{
 	' ':  []DiDah(" "),

@@ -60,9 +60,14 @@ var Modes = map[string]ModeSpec{
 }
 
 func mainCW(text string) Emitter {
+	dit := Secs(*DIT)
+	if *WPM != 0 {
+		//dit = Secs(*WPM * 0.1 / 12)
+		dit = Secs(1.2 / *WPM)
+	}
 	o := &CWConf{
 		ToneWhenOff: false,
-		Dit:         Secs(*DIT),
+		Dit:         dit,
 		Freq:        0,
 		Bandwidth:   0,
 		Text:        text,
