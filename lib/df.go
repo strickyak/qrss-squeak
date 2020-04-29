@@ -14,6 +14,7 @@ type DFConf struct {
 	Morse       []DiDah
 	Text        string
 	Tail        bool
+	Fishbone    bool
 }
 type DFEmitter struct {
 	DFConf
@@ -65,17 +66,33 @@ func (o *DFEmitter) Emit(out chan Volt) {
 			PlayGap(o.Dit, out)
 		}
 	}
+	halfDit := o.Dit / time.Duration(2)
 
 	for _, didah := range o.Morse {
-		switch didah {
-		case '.':
-			PlayTone(f1, f1, BOTH, o.Dit, AutomaticRampDuration, out)
-		case '-':
-			PlayTone(f2, f2, BOTH, o.Dit, AutomaticRampDuration, out)
-		case ' ':
-			gap()
-		default:
-			log.Fatalf("bad didah: %d in %q", didah, o.Text)
+		if o.Fishbone {
+			switch didah {
+			case '.':
+				PlayTone(f1, f1, BEGIN, halfDit, AutomaticRampDuration, out)
+				PlayTone(f1, f1+o.Bandwidth/2, END, halfDit, AutomaticRampDuration, out)
+			case '-':
+				PlayTone(f2, f2, BEGIN, halfDit, AutomaticRampDuration, out)
+				PlayTone(f2, f2-o.Bandwidth/2, END, halfDit, AutomaticRampDuration, out)
+			case ' ':
+				gap()
+			default:
+				log.Fatalf("bad didah: %d in %q", didah, o.Text)
+			}
+		} else {
+			switch didah {
+			case '.':
+				PlayTone(f1, f1, BOTH, o.Dit, AutomaticRampDuration, out)
+			case '-':
+				PlayTone(f2, f2, BOTH, o.Dit, AutomaticRampDuration, out)
+			case ' ':
+				gap()
+			default:
+				log.Fatalf("bad didah: %d in %q", didah, o.Text)
+			}
 		}
 	}
 	log.Printf("DFEmitter Finish: %v", o)

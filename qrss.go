@@ -40,12 +40,13 @@ type ModeSpec struct {
 
 var Modes = map[string]ModeSpec{
 	// Usual modes:
-	"cw":      ModeSpec{mainCW, "normal CW (single tone)"},
-	"fs":      ModeSpec{mainFSCW, "Frequency Shift CW (low tone for gaps)"},
-	"df":      ModeSpec{mainDFCW, "Dual Frequency CW (high tone for dahs)"},
-	"tf":      ModeSpec{mainTFCW, "Three Frequency CW (mid-tone for OFF state)"},
-	"hell":    ModeSpec{mainHell, "Hellschreiber: print human-readable ASCII directly in spectrum"},
-	"marimba": ModeSpec{mainMarimba, "draw bitmap in spectrum with many tiny oscillators"},
+	"cw":       ModeSpec{mainCW, "normal CW (single tone)"},
+	"fs":       ModeSpec{mainFSCW, "Frequency Shift CW (low tone for gaps)"},
+	"df":       ModeSpec{mainDFCW, "Dual Frequency CW (high tone for dahs)"},
+	"tf":       ModeSpec{mainTFCW, "Three Frequency CW (mid-tone for OFF state)"},
+	"hell":     ModeSpec{mainHell, "Hellschreiber: print human-readable ASCII directly in spectrum"},
+	"marimba":  ModeSpec{mainMarimba, "draw bitmap in spectrum with many tiny oscillators"},
+	"fishbone": ModeSpec{mainFishbone, "Fishbone-shaped Dual Frequency CW (high tone for dahs)"},
 
 	// Weird modes:
 	"par":    ModeSpec{mainParallelCW, "CW letters in parallel (polyphonic)"},
@@ -79,6 +80,19 @@ func mainFSCW(text string) Emitter {
 		Tail:        true,
 	}
 	return NewCWEmitter(o)
+}
+
+func mainFishbone(text string) Emitter {
+	o := &DFConf{
+		ToneWhenOff: false,
+		Dit:         Secs(*DIT),
+		Freq:        0,
+		Bandwidth:   *BW,
+		Text:        text,
+		Tail:        true,
+		Fishbone:    true,
+	}
+	return NewDFEmitter(o)
 }
 
 func mainDFCW(text string) Emitter {
